@@ -1,0 +1,58 @@
+{
+  "family": "chat-backend-task",
+  "networkMode": "awsvpc",
+  "requiresCompatibilities": [
+    "FARGATE"
+  ],
+  "cpu": "512",
+  "memory": "1024",
+  "containerDefinitions": [
+    {
+      "name": "chat-backend",
+      "image": "<AWS_ACCOUNT_ID>.dkr.ecr.<AWS_REGION>.amazonaws.com/chat-backend:latest",
+      "essential": true,
+      "portMappings": [
+        {
+          "containerPort": 8080,
+          "protocol": "tcp"
+        }
+      ],
+      "environment": [
+        {
+          "name": "SPRING_KAFKA_BOOTSTRAP_SERVERS",
+          "value": "<MSK_BOOTSTRAP_SERVERS>"
+        },
+        {
+          "name": "APP_JWT_SECRET",
+          "value": "<BASE64_JWT_SECRET>"
+        },
+        {
+          "name": "DB_HOST",
+          "value": "<RDS_HOST>"
+        },
+        {
+          "name": "DB_NAME",
+          "value": "<RDS_DB>"
+        },
+        {
+          "name": "DB_USER",
+          "value": "<RDS_USER>"
+        }
+      ],
+      "secrets": [
+        {
+          "name": "DB_PASS",
+          "valueFrom": "arn:aws:secretsmanager:<AWS_REGION>:<AWS_ACCOUNT_ID>:secret:chat-db-pass"
+        }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/chat-backend",
+          "awslogs-region": "<AWS_REGION>",
+          "awslogs-stream-prefix": "ecs"
+        }
+      }
+    }
+  ]
+}

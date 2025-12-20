@@ -1,0 +1,15 @@
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
+
+CREATE TABLE IF NOT EXISTS refresh_tokens (
+  token VARCHAR(255) PRIMARY KEY,
+  username VARCHAR(255) NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS chat_messages (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  room_id VARCHAR(150) NOT NULL,
+  sender VARCHAR(150) NOT NULL,
+  content TEXT NOT NULL,
+  sent_at TIMESTAMP NOT NULL DEFAULT NOW()
+);

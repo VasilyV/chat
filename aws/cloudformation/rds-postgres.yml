@@ -1,0 +1,28 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: RDS Postgres for chat app (example)
+Resources:
+  ChatDbSubnetGroup:
+    Type: AWS::RDS::DBSubnetGroup
+    Properties:
+      DBSubnetGroupDescription: Chat DB subnet group
+      SubnetIds:
+        - subnet-aaaaaaaa
+        - subnet-bbbbbbbb
+
+  ChatDb:
+    Type: AWS::RDS::DBInstance
+    Properties:
+      DBInstanceIdentifier: chat-db
+      Engine: postgres
+      AllocatedStorage: 20
+      DBInstanceClass: db.t3.small
+      MasterUsername: <DB_MASTER_USER>
+      MasterUserPassword: <DB_MASTER_PASSWORD>
+      DBSubnetGroupName: !Ref ChatDbSubnetGroup
+      VPCSecurityGroups:
+        - sg-xxxxxxxx
+      MultiAZ: false
+Outputs:
+  DBEndpoint:
+    Description: RDS endpoint
+    Value: !GetAtt ChatDb.Endpoint.Address

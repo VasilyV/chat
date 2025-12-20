@@ -1,0 +1,88 @@
+version: '3.8'
+services:
+  zookeeper:
+    image: bitnamilegacy/zookeeper:3.8.4
+    environment:
+      - ALLOW_ANONYMOUS_LOGIN=yes
+      - ZOO_HEAP_SIZE=512
+    ports:
+      - '2181:2181'
+
+  kafka:
+    image: bitnamilegacy/kafka:3
+    environment:
+      - KAFKA_HEAP_OPTS=-Xms1g -Xmx1g
+      - KAFKA_BROKER_ID=1
+      - KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181
+      - KAFKA_LISTENERS=PLAINTEXT://:9092
+      - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092
+      - ALLOW_PLAINTEXT_LISTENER=yes
+      - KAFKA_CFG_NUM_PARTITIONS=20
+      - KAFKA_CFG_LOG_RETENTION_HOURS=1
+      - KAFKA_CFG_NUM_RECOVERY_THREADS_PER_DATA_DIR=1
+      - KAFKA_CFG_OFFSETS_TOPIC_REPLICATION_FACTOR=1
+      - KAFKA_CFG_TRANSACTION_STATE_LOG_REPLICATION_FACTOR=1
+      - KAFKA_CFG_TRANSACTION_STATE_LOG_MIN_ISR=1
+      - KAFKA_CFG_ZOOKEEPER_SESSION_TIMEOUT_MS=60000
+      - KAFKA_CFG_ZOOKEEPER_CONNECTION_TIMEOUT_MS=60000
+    ports:
+      - '9092:9092'
+    depends_on:
+      - zookeeper
+
+  redis:
+    image: redis:7-alpine
+    container_name: chat-redis
+    ports:
+      - "6379:6379"
+    command: [ "redis-server", "--save", "", "--appendonly", "no" ]
+
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: chatuser
+      POSTGRES_PASSWORD: chatpass
+      POSTGRES_DB: chatdb
+    ports:
+      - '5432:5432'
+
+  backend:
+    build: ./backend
+    # do NOT bind host port here; only expose inside the docker network
+    deploy:
+      replicas: 5
+    expose:
+      - "8080"
+    depends_on:
+      - kafka
+      - db
+      - redis
+    environment:
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_NAME=chatdb
+      - DB_USER=chatuser
+      - DB_PASS=chatpass
+      - APP_JWT_SECRET=fvv204N+jsMt9jMfErSSJzJL+8f+R789ui6bWSd/LrA=
+      - SPRING_DATA_REDIS_HOST=redis
+      - SPRING_DATA_REDIS_PORT=6379
+
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "8080:8080"
+    depends_on:
+      - backend
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+
+  frontend:
+    build: ./frontend
+    depends_on:
+      - backend
+    ports:
+      - '3000:80'
+    environment:
+      # frontend talks to nginx, not directly to backend
+      - VITE_API_URL=http://localhost:8080

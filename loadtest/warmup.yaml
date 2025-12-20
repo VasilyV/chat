@@ -1,0 +1,17 @@
+config:
+  target: "http://localhost:8080"
+  phases:
+    - duration: 500
+      arrivalRate: 1   # 1 user per second creates account
+  processor: "./warmup.js"
+
+scenarios:
+  - name: "create users"
+    flow:
+      - function: "generateUser"
+      - post:
+          url: "/api/auth/register"
+          json:
+            username: "{{ username }}"
+            password: "{{ password }}"
+      - function: "saveUser"

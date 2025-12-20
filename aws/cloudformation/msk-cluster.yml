@@ -1,0 +1,25 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: MSK cluster for chat app (fill subnets/security groups before deploy)
+Resources:
+  MSKCluster:
+    Type: AWS::MSK::Cluster
+    Properties:
+      ClusterName: chat-msk-cluster
+      KafkaVersion: 3.4.0
+      NumberOfBrokerNodes: 3
+      BrokerNodeGroupInfo:
+        InstanceType: kafka.m5.large
+        ClientSubnets:
+          - subnet-xxxxxxxx
+          - subnet-yyyyyyyy
+          - subnet-zzzzzzzz
+        SecurityGroups:
+          - sg-xxxxxxxx
+      EncryptionInfo:
+        EncryptionInTransit:
+          ClientBroker: PLAINTEXT
+      EnhancedMonitoring: PER_TOPIC_PER_BROKER
+Outputs:
+  BootstrapServers:
+    Description: MSK bootstrap servers (use console to obtain)
+    Value: !Sub 'b-1.chat-msk-cluster.xxxxxx.c2.kafka.amazonaws.com:9092'
