@@ -1,12 +1,21 @@
 package com.example.chat.model;
 
-public class ChatMessage {
+import java.time.Instant;
 
+public class ChatMessage {
+    private Long id;
     private String roomId;
     private String sender;
     private String content;
+    private Instant createdAt;
 
-    public ChatMessage() {}
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
 
     public String getRoomId() { return roomId; }
     public void setRoomId(String roomId) { this.roomId = roomId; }
@@ -16,4 +25,7 @@ public class ChatMessage {
 
     public String getContent() { return content; }
     public void setContent(String content) { this.content = content; }
+
+    public Instant getCreatedAt() { return createdAt; }
+    public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
 }

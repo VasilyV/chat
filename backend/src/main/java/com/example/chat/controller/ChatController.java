@@ -4,7 +4,6 @@ import com.example.chat.kafka.ChatKafkaProducer;
 import com.example.chat.model.ChatMessage;
 import com.example.chat.redis.RedisPublisher;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.stereotype.Controller;
 

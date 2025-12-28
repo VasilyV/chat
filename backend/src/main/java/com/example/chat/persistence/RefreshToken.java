@@ -1,4 +1,4 @@
-package com.example.chat.auth;
+package com.example.chat.persistence;
 
 import jakarta.persistence.*;
 import java.time.Instant;

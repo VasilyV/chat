@@ -1,0 +1,135 @@
+package com.example.chat.controller;
+
+import com.example.chat.config.WebSocketConfig;
+import com.example.chat.kafka.ChatKafkaProducer;
+import com.example.chat.model.ChatMessage;
+import com.example.chat.redis.RedisPublisher;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
+import org.springframework.boot.SpringBootConfiguration;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.context.annotation.Import;
+import org.springframework.messaging.converter.MappingJackson2MessageConverter;
+import org.springframework.web.socket.client.standard.StandardWebSocketClient;
+import org.springframework.web.socket.messaging.WebSocketStompClient;
+import org.springframework.messaging.simp.stomp.*;
+
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.*;
+
+@SpringBootTest(
+        classes = ChatControllerWebSocketTest.TestApp.class,
+        webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
+        properties = {
+                "spring.flyway.enabled=false",
+                "spring.autoconfigure.exclude=" +
+                        "org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration," +
+                        "org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration," +
+                        "org.springframework.boot.autoconfigure.data.jpa.JpaRepositoriesAutoConfiguration," +
+                        "org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration," +
+                        "org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration"
+        }
+)
+class ChatControllerWebSocketTest {
+
+    @SpringBootConfiguration
+    @EnableAutoConfiguration
+    @Import({ ChatController.class, WebSocketConfig.class })
+    static class TestApp { }
+
+    @LocalServerPort
+    int port;
+
+    @MockBean
+    ChatKafkaProducer producer;
+
+    @MockBean
+    RedisPublisher redisPublisher;
+
+    @MockBean
+    com.example.chat.service.ChatMessageService chatMessageService;
+
+    private WebSocketStompClient stompClient;
+    private StompSession session;
+
+    @AfterEach
+    void tearDown() {
+        try {
+            if (session != null && session.isConnected()) session.disconnect();
+        } catch (Exception ignored) {}
+        try {
+            if (stompClient != null) stompClient.stop();
+        } catch (Exception ignored) {}
+    }
+
+    @Test
+    void sendMessage_overWebSocket_shouldSendToKafka_andPublishToRedis() throws Exception {
+        // Arrange
+        CountDownLatch latch = new CountDownLatch(2);
+        doAnswer(inv -> { latch.countDown(); return null; })
+                .when(producer).sendMessage(anyString(), anyString(), anyString());
+        doAnswer(inv -> { latch.countDown(); return null; })
+                .when(redisPublisher).publish(anyString(), anyString());
+
+        stompClient = new WebSocketStompClient(new StandardWebSocketClient());
+        stompClient.setMessageConverter(new MappingJackson2MessageConverter());
+
+        String url = "ws://localhost:" + port + "/ws-chat";
+        session = stompClient
+                .connectAsync(url, new StompSessionHandlerAdapter() {})
+                .get(3, TimeUnit.SECONDS);
+
+        ChatMessage m = new ChatMessage();
+        m.setRoomId("room-1");
+        m.setSender("alice");
+        m.setContent("hello");
+
+        // Act: send to @MessageMapping("/chat.sendMessage") with /app prefix
+        session.send("/app/chat.sendMessage", m);
+
+        // Assert: wait for async handling
+        if (!latch.await(3, TimeUnit.SECONDS)) {
+            fail("Timed out waiting for Kafka + Redis calls");
+        }
+
+        ArgumentCaptor<String> topicCaptor = ArgumentCaptor.forClass(String.class);
+        ArgumentCaptor<String> payloadCaptor = ArgumentCaptor.forClass(String.class);
+        ArgumentCaptor<String> keyCaptor = ArgumentCaptor.forClass(String.class);
+
+        verify(producer, times(1))
+                .sendMessage(topicCaptor.capture(), payloadCaptor.capture(), keyCaptor.capture());
+
+        assertThat(topicCaptor.getValue()).isEqualTo("chat-messages");
+        assertThat(keyCaptor.getValue()).isEqualTo("room-1");
+
+        ObjectMapper mapper = new ObjectMapper();
+        JsonNode sent = mapper.readTree(payloadCaptor.getValue());
+        assertThat(sent.get("roomId").asText()).isEqualTo("room-1");
+        assertThat(sent.get("sender").asText()).isEqualTo("alice");
+        assertThat(sent.get("content").asText()).isEqualTo("hello");
+
+        ArgumentCaptor<String> channelCaptor = ArgumentCaptor.forClass(String.class);
+        ArgumentCaptor<String> redisPayloadCaptor = ArgumentCaptor.forClass(String.class);
+
+        verify(redisPublisher, times(1))
+                .publish(channelCaptor.capture(), redisPayloadCaptor.capture());
+
+        assertThat(channelCaptor.getValue()).isEqualTo("chat:room:room-1");
+
+        JsonNode redis = mapper.readTree(redisPayloadCaptor.getValue());
+        assertThat(redis.get("roomId").asText()).isEqualTo("room-1");
+        assertThat(redis.get("sender").asText()).isEqualTo("alice");
+        assertThat(redis.get("content").asText()).isEqualTo("hello");
+    }
+}
