@@ -3,8 +3,6 @@ package com.example.chat.kafka;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.example.chat.service.ChatMessageService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.Acknowledgment;
@@ -24,15 +22,13 @@ public class ChatKafkaConsumer {
     }
 
     @KafkaListener(topics = "chat-messages", groupId = "chat-backend-group")
-    public void listen(String payload, Acknowledgment ack) throws Exception {
+    public void listen(String payload, Acknowledgment ack) {
         try {
             save(payload);
             ack.acknowledge();
         } catch (Exception e) {
-            System.out.println("Error while listening to chat-messages: " + e.getMessage());
             kafkaTemplate.send("chat-messages-dlq", payload);
         }
-
     }
 
     private void save (String payload) throws JsonProcessingException {

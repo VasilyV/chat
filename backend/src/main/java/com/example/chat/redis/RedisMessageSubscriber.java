@@ -25,11 +25,6 @@ public class RedisMessageSubscriber implements MessageListener {
     @Override
     public void onMessage(Message message, byte[] pattern) {
         try {
-            System.out.println("REDIS SUB message received — raw channel = " +
-                    new String(message.getChannel()));
-
-            System.out.println("REDIS SUB body = " +
-                    new String(message.getBody()));
             String channel = new String(message.getChannel(), StandardCharsets.UTF_8);
             String body = new String(message.getBody(), StandardCharsets.UTF_8);
 
@@ -39,7 +34,6 @@ public class RedisMessageSubscriber implements MessageListener {
             ChatMessageEntity chatMessage = mapper.readValue(body, ChatMessageEntity.class);
 
             messagingTemplate.convertAndSend("/topic/rooms/" + roomId, chatMessage);
-            System.out.println("Message sent to room: " + roomId);
         } catch (Exception e) {
             e.printStackTrace();
         }

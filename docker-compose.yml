@@ -119,14 +119,14 @@ services:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
 
   frontend:
-    build: ./frontend
+    build:
+      context: ./frontend
+      args:
+        VITE_API_URL: "http://localhost:8080"
     depends_on:
       - backend
     ports:
       - '3000:80'
-    environment:
-      # frontend talks to nginx, not directly to backend
-      - VITE_API_URL=http://localhost:8080
 
 volumes:
   kafka_data:

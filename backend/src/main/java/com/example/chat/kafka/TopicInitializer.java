@@ -16,7 +16,6 @@ public class TopicInitializer {
         );
 
         admin.createTopics(topics);
-        System.out.println("Kafka topics initialized.");
     }
 }
 

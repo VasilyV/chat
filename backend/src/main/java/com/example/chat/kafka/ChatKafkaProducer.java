@@ -13,7 +13,6 @@ public class ChatKafkaProducer {
     }
 
     public void sendMessage(String topic, String message, String roomId) {
-        System.out.println("Sending message to topic " + topic);
         kafkaTemplate.send(topic, roomId, message);
     }
 }

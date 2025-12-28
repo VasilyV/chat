@@ -1,0 +1,553 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: >
+  Chat app on ECS Fargate behind an ALB, optional RDS Postgres + ElastiCache Redis.
+  SAFE-BY-DEFAULT: EnableDeploy defaults to false, so stack creates nothing unless you flip it.
+
+Parameters:
+  EnableDeploy:
+    Type: String
+    Default: "false"
+    AllowedValues: ["false", "true"]
+    Description: "Safety switch. Must be true to create any AWS resources."
+
+  ProjectName:
+    Type: String
+    Default: "chat"
+
+  # Images (push to ECR or any registry, then paste URIs here)
+  BackendImage:
+    Type: String
+    Default: "REPLACE_ME_BACKEND_IMAGE_URI"
+  FrontendImage:
+    Type: String
+    Default: "REPLACE_ME_FRONTEND_IMAGE_URI"
+
+  DesiredCountBackend:
+    Type: Number
+    Default: 1
+  DesiredCountFrontend:
+    Type: Number
+    Default: 1
+
+  JwtSecret:
+    Type: String
+    NoEcho: true
+    Default: "CHANGE_ME"
+    Description: "JWT secret used by backend (JWT_SECRET env var)."
+
+  # Optional data services (these cost money if enabled)
+  CreateRds:
+    Type: String
+    Default: "false"
+    AllowedValues: ["false", "true"]
+  CreateRedis:
+    Type: String
+    Default: "false"
+    AllowedValues: ["false", "true"]
+
+  DbName:
+    Type: String
+    Default: "chat"
+  DbUsername:
+    Type: String
+    Default: "chat"
+  DbPassword:
+    Type: String
+    NoEcho: true
+    Default: "CHANGE_ME_DB_PASSWORD"
+
+  # If you DON'T create RDS/Redis via this template, you can provide existing endpoints
+  PostgresUrl:
+    Type: String
+    Default: ""
+    Description: "If CreateRds=false, supply jdbc:postgresql://host:5432/dbname"
+  PostgresUser:
+    Type: String
+    Default: ""
+  PostgresPassword:
+    Type: String
+    NoEcho: true
+    Default: ""
+
+  RedisHost:
+    Type: String
+    Default: ""
+  RedisPort:
+    Type: String
+    Default: "6379"
+
+  # Kafka / MSK
+  # NOTE: This template does NOT create MSK (to keep it simple + avoid wiring bootstrap brokers via custom resources).
+  # You pass KAFKA_BOOTSTRAP_SERVERS here (e.g., from MSK "View client information").
+  KafkaBootstrapServers:
+    Type: String
+    Default: ""
+    Description: "Kafka/MSK bootstrap servers string. Leave empty if you don't use Kafka in AWS."
+
+Conditions:
+  DoDeploy: !Equals [!Ref EnableDeploy, "true"]
+  DoRds: !And [!Condition DoDeploy, !Equals [!Ref CreateRds, "true"]]
+  DoRedis: !And [!Condition DoDeploy, !Equals [!Ref CreateRedis, "true"]]
+
+Resources:
+
+  # --------------------
+  # Networking
+  # --------------------
+  Vpc:
+    Condition: DoDeploy
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 10.20.0.0/16
+      EnableDnsHostnames: true
+      EnableDnsSupport: true
+      Tags:
+        - Key: Name
+          Value: !Sub "${ProjectName}-vpc"
+
+  InternetGateway:
+    Condition: DoDeploy
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: Name
+          Value: !Sub "${ProjectName}-igw"
+
+  AttachIgw:
+    Condition: DoDeploy
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: !Ref Vpc
+      InternetGatewayId: !Ref InternetGateway
+
+  PublicRouteTable:
+    Condition: DoDeploy
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref Vpc
+
+  PublicRoute:
+    Condition: DoDeploy
+    Type: AWS::EC2::Route
+    DependsOn: AttachIgw
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGateway
+
+  PublicSubnetA:
+    Condition: DoDeploy
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref Vpc
+      AvailabilityZone: !Select [0, !GetAZs ""]
+      CidrBlock: 10.20.1.0/24
+      MapPublicIpOnLaunch: true
+
+  PublicSubnetB:
+    Condition: DoDeploy
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref Vpc
+      AvailabilityZone: !Select [1, !GetAZs ""]
+      CidrBlock: 10.20.2.0/24
+      MapPublicIpOnLaunch: true
+
+  PublicSubnetARouteAssoc:
+    Condition: DoDeploy
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PublicSubnetA
+      RouteTableId: !Ref PublicRouteTable
+
+  PublicSubnetBRouteAssoc:
+    Condition: DoDeploy
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PublicSubnetB
+      RouteTableId: !Ref PublicRouteTable
+
+  PrivateSubnetA:
+    Condition: DoDeploy
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref Vpc
+      AvailabilityZone: !Select [0, !GetAZs ""]
+      CidrBlock: 10.20.11.0/24
+      MapPublicIpOnLaunch: false
+
+  PrivateSubnetB:
+    Condition: DoDeploy
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref Vpc
+      AvailabilityZone: !Select [1, !GetAZs ""]
+      CidrBlock: 10.20.12.0/24
+      MapPublicIpOnLaunch: false
+
+  # --------------------
+  # Security Groups
+  # --------------------
+  AlbSg:
+    Condition: DoDeploy
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: "ALB SG"
+      VpcId: !Ref Vpc
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+
+  FrontendSg:
+    Condition: DoDeploy
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: "Frontend task SG"
+      VpcId: !Ref Vpc
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          SourceSecurityGroupId: !Ref AlbSg
+
+  BackendSg:
+    Condition: DoDeploy
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: "Backend task SG"
+      VpcId: !Ref Vpc
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 8080
+          ToPort: 8080
+          SourceSecurityGroupId: !Ref AlbSg
+
+  DbSg:
+    Condition: DoRds
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: "RDS SG"
+      VpcId: !Ref Vpc
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 5432
+          ToPort: 5432
+          SourceSecurityGroupId: !Ref BackendSg
+
+  RedisSg:
+    Condition: DoRedis
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: "ElastiCache Redis SG"
+      VpcId: !Ref Vpc
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 6379
+          ToPort: 6379
+          SourceSecurityGroupId: !Ref BackendSg
+
+  # --------------------
+  # ALB
+  # --------------------
+  Alb:
+    Condition: DoDeploy
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      Name: !Sub "${ProjectName}-alb"
+      Scheme: internet-facing
+      Type: application
+      Subnets:
+        - !Ref PublicSubnetA
+        - !Ref PublicSubnetB
+      SecurityGroups:
+        - !Ref AlbSg
+
+  FrontendTargetGroup:
+    Condition: DoDeploy
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      VpcId: !Ref Vpc
+      TargetType: ip
+      Port: 80
+      Protocol: HTTP
+      HealthCheckPath: /
+      Matcher:
+        HttpCode: "200-399"
+
+  BackendTargetGroup:
+    Condition: DoDeploy
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      VpcId: !Ref Vpc
+      TargetType: ip
+      Port: 8080
+      Protocol: HTTP
+      HealthCheckPath: /api/health
+      Matcher:
+        HttpCode: "200-399"
+
+  Listener:
+    Condition: DoDeploy
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      LoadBalancerArn: !Ref Alb
+      Port: 80
+      Protocol: HTTP
+      DefaultActions:
+        - Type: forward
+          TargetGroupArn: !Ref FrontendTargetGroup
+
+  # Route /api/* and /ws-chat* to backend
+  ListenerRuleApi:
+    Condition: DoDeploy
+    Type: AWS::ElasticLoadBalancingV2::ListenerRule
+    Properties:
+      ListenerArn: !Ref Listener
+      Priority: 10
+      Conditions:
+        - Field: path-pattern
+          Values: ["/api/*"]
+      Actions:
+        - Type: forward
+          TargetGroupArn: !Ref BackendTargetGroup
+
+  ListenerRuleWs:
+    Condition: DoDeploy
+    Type: AWS::ElasticLoadBalancingV2::ListenerRule
+    Properties:
+      ListenerArn: !Ref Listener
+      Priority: 11
+      Conditions:
+        - Field: path-pattern
+          Values: ["/ws-chat*"]
+      Actions:
+        - Type: forward
+          TargetGroupArn: !Ref BackendTargetGroup
+
+  # --------------------
+  # ECS + Roles
+  # --------------------
+  EcsCluster:
+    Condition: DoDeploy
+    Type: AWS::ECS::Cluster
+    Properties:
+      ClusterName: !Sub "${ProjectName}-cluster"
+
+  TaskExecutionRole:
+    Condition: DoDeploy
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ecs-tasks.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy
+
+  TaskRole:
+    Condition: DoDeploy
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ecs-tasks.amazonaws.com
+            Action: sts:AssumeRole
+
+  FrontendLogGroup:
+    Condition: DoDeploy
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "/ecs/${ProjectName}/frontend"
+      RetentionInDays: 7
+
+  BackendLogGroup:
+    Condition: DoDeploy
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "/ecs/${ProjectName}/backend"
+      RetentionInDays: 7
+
+  # --------------------
+  # Optional RDS Postgres
+  # --------------------
+  DbSubnetGroup:
+    Condition: DoRds
+    Type: AWS::RDS::DBSubnetGroup
+    Properties:
+      DBSubnetGroupDescription: "Subnets for RDS"
+      SubnetIds:
+        - !Ref PrivateSubnetA
+        - !Ref PrivateSubnetB
+
+  Postgres:
+    Condition: DoRds
+    Type: AWS::RDS::DBInstance
+    DeletionPolicy: Delete
+    UpdateReplacePolicy: Delete
+    Properties:
+      Engine: postgres
+      DBInstanceClass: db.t4g.micro
+      AllocatedStorage: 20
+      PubliclyAccessible: false
+      DBName: !Ref DbName
+      MasterUsername: !Ref DbUsername
+      MasterUserPassword: !Ref DbPassword
+      VPCSecurityGroups:
+        - !Ref DbSg
+      DBSubnetGroupName: !Ref DbSubnetGroup
+
+  # --------------------
+  # Optional ElastiCache Redis
+  # --------------------
+  RedisSubnetGroup:
+    Condition: DoRedis
+    Type: AWS::ElastiCache::SubnetGroup
+    Properties:
+      Description: "Subnets for Redis"
+      SubnetIds:
+        - !Ref PrivateSubnetA
+        - !Ref PrivateSubnetB
+
+  Redis:
+    Condition: DoRedis
+    Type: AWS::ElastiCache::ReplicationGroup
+    DeletionPolicy: Delete
+    UpdateReplacePolicy: Delete
+    Properties:
+      ReplicationGroupDescription: !Sub "${ProjectName} redis"
+      Engine: redis
+      CacheNodeType: cache.t4g.micro
+      NumNodeGroups: 1
+      ReplicasPerNodeGroup: 0
+      AutomaticFailoverEnabled: false
+      CacheSubnetGroupName: !Ref RedisSubnetGroup
+      SecurityGroupIds:
+        - !Ref RedisSg
+
+  # --------------------
+  # Task Definitions
+  # --------------------
+  FrontendTaskDef:
+    Condition: DoDeploy
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      Family: !Sub "${ProjectName}-frontend"
+      Cpu: "256"
+      Memory: "512"
+      NetworkMode: awsvpc
+      RequiresCompatibilities: ["FARGATE"]
+      ExecutionRoleArn: !GetAtt TaskExecutionRole.Arn
+      TaskRoleArn: !GetAtt TaskRole.Arn
+      ContainerDefinitions:
+        - Name: frontend
+          Image: !Ref FrontendImage
+          PortMappings:
+            - ContainerPort: 80
+              Protocol: tcp
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-group: !Ref FrontendLogGroup
+              awslogs-region: !Ref AWS::Region
+              awslogs-stream-prefix: ecs
+
+  BackendTaskDef:
+    Condition: DoDeploy
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      Family: !Sub "${ProjectName}-backend"
+      Cpu: "512"
+      Memory: "1024"
+      NetworkMode: awsvpc
+      RequiresCompatibilities: ["FARGATE"]
+      ExecutionRoleArn: !GetAtt TaskExecutionRole.Arn
+      TaskRoleArn: !GetAtt TaskRole.Arn
+      ContainerDefinitions:
+        - Name: backend
+          Image: !Ref BackendImage
+          PortMappings:
+            - ContainerPort: 8080
+              Protocol: tcp
+          Environment:
+            - Name: JWT_SECRET
+              Value: !Ref JwtSecret
+
+            - Name: POSTGRES_URL
+              Value: !If
+                - DoRds
+                - !Sub "jdbc:postgresql://${Postgres.Endpoint.Address}:${Postgres.Endpoint.Port}/${DbName}"
+                - !Ref PostgresUrl
+            - Name: POSTGRES_USER
+              Value: !If [DoRds, !Ref DbUsername, !Ref PostgresUser]
+            - Name: POSTGRES_PASSWORD
+              Value: !If [DoRds, !Ref DbPassword, !Ref PostgresPassword]
+
+            - Name: REDIS_HOST
+              Value: !If [DoRedis, !GetAtt Redis.PrimaryEndPoint.Address, !Ref RedisHost]
+            - Name: REDIS_PORT
+              Value: !Ref RedisPort
+
+            - Name: KAFKA_BOOTSTRAP_SERVERS
+              Value: !Ref KafkaBootstrapServers
+
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-group: !Ref BackendLogGroup
+              awslogs-region: !Ref AWS::Region
+              awslogs-stream-prefix: ecs
+
+  # --------------------
+  # Services
+  # --------------------
+  FrontendService:
+    Condition: DoDeploy
+    Type: AWS::ECS::Service
+    Properties:
+      ServiceName: !Sub "${ProjectName}-frontend"
+      Cluster: !Ref EcsCluster
+      DesiredCount: !Ref DesiredCountFrontend
+      LaunchType: FARGATE
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          AssignPublicIp: ENABLED
+          Subnets: [!Ref PublicSubnetA, !Ref PublicSubnetB]
+          SecurityGroups: [!Ref FrontendSg]
+      TaskDefinition: !Ref FrontendTaskDef
+      LoadBalancers:
+        - ContainerName: frontend
+          ContainerPort: 80
+          TargetGroupArn: !Ref FrontendTargetGroup
+
+  BackendService:
+    Condition: DoDeploy
+    Type: AWS::ECS::Service
+    Properties:
+      ServiceName: !Sub "${ProjectName}-backend"
+      Cluster: !Ref EcsCluster
+      DesiredCount: !Ref DesiredCountBackend
+      LaunchType: FARGATE
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          AssignPublicIp: ENABLED
+          Subnets: [!Ref PublicSubnetA, !Ref PublicSubnetB]
+          SecurityGroups: [!Ref BackendSg]
+      TaskDefinition: !Ref BackendTaskDef
+      LoadBalancers:
+        - ContainerName: backend
+          ContainerPort: 8080
+          TargetGroupArn: !Ref BackendTargetGroup
+
+Outputs:
+  AlbUrl:
+    Condition: DoDeploy
+    Description: "Public ALB URL"
+    Value: !Sub "http://${Alb.DNSName}"

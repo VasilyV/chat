@@ -28,6 +28,5 @@ public class ChatController {
         String channel = "chat:room:" + roomId;
         String redisPayload = mapper.writeValueAsString(message);
         redisPublisher.publish(channel, redisPayload);
-        System.out.println("PUBLISHED to Redis channel = " + channel + " payload=" + redisPayload);
     }
 }

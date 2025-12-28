@@ -99,22 +99,14 @@ public class AuthController {
 
         String username = storedRefreshToken.getUsername();
 
-        // (Optional but recommended) rotate refresh token:
         authService.deleteById(refreshToken);
         String newRefreshToken = UUID.randomUUID().toString();
         authService.save(new RefreshToken(newRefreshToken, username));
 
         String newAccess = jwtTokenProvider.createAccessToken(username, List.of("ROLE_USER"));
-        ResponseCookie accessCookie = ResponseCookie.from("accessToken", newAccess)
-                .httpOnly(true)
-                .secure(true)
-                .sameSite("None")
-                .path("/")
-                .maxAge(Duration.ofHours(1))
-                .build();
 
         return ResponseEntity.ok()
-                .header(HttpHeaders.SET_COOKIE, accessCookie.toString())
+                .header(HttpHeaders.SET_COOKIE, accessCookie(newAccess).toString())
                 .header(HttpHeaders.SET_COOKIE, refreshCookie(newRefreshToken).toString())
                 .body(Map.of("ok", true));
     }
@@ -122,11 +114,20 @@ public class AuthController {
     @PostMapping("/logout")
     public ResponseEntity<?> logout(@CookieValue(name = "refreshToken", required = false) String refreshToken) {
         authService.revokeAllForToken(refreshToken);
-        System.out.println("Tokens successfully revoked");
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, clearAccessCookie().toString())
                 .header(HttpHeaders.SET_COOKIE, clearRefreshCookie().toString())
                 .body(Map.of("message", "Logged out"));
+    }
+
+    private ResponseCookie accessCookie(String token) {
+        return ResponseCookie.from("accessToken", token)
+                .httpOnly(true)
+                .secure(true)
+                .sameSite("None")
+                .path("/")
+                .maxAge(Duration.ofHours(1))
+                .build();
     }
 
     private ResponseCookie refreshCookie(String token) {

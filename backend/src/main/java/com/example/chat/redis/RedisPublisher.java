@@ -22,7 +22,7 @@ public class RedisPublisher {
             try {
                 redisTemplate.convertAndSend(channel, payload);
             } catch (Exception e) {
-                System.out.println("Exception while sending to Redis:" + e.getMessage());
+
             }
         });
     }
