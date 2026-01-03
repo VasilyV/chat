@@ -63,7 +63,7 @@ class ChatHistoryControllerTest {
         controller.getMessages("room", 999, null, null);
 
         verify(service).getMessages(eq("room"), isNull(), isNull(), limitCaptor.capture());
-        assertThat(limitCaptor.getValue()).isEqualTo(201); // MAX_LIMIT (200) + 1
+        assertThat(limitCaptor.getValue()).isEqualTo(201);
     }
 
     @Test
@@ -72,7 +72,6 @@ class ChatHistoryControllerTest {
         Instant t2 = Instant.parse("2025-01-02T00:00:00Z");
         Instant t1 = Instant.parse("2025-01-01T00:00:00Z");
 
-        // service called with safeLimit+1; we return 3 items so that safeLimit=2 hasMore=true
         when(service.getMessages(eq("room"), isNull(), isNull(), eq(3)))
                 .thenReturn(List.of(
                         chatMessage(3, t3, "room"),
@@ -88,7 +87,6 @@ class ChatHistoryControllerTest {
         assertThat(res.nextCursor().createdAt()).isEqualTo(t2);
         assertThat(res.nextCursor().id()).isEqualTo(2L);
 
-        // DTO mapping
         ChatMessageView first = res.content().get(0);
         assertThat(first.roomId()).isEqualTo("room");
         assertThat(first.sender()).isEqualTo("u3");

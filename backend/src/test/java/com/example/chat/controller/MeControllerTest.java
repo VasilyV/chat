@@ -40,7 +40,6 @@ class MeControllerTest {
 
     @Test
     void me_shouldReturn401_whenNotAuthenticated() throws Exception {
-        // no auth in SecurityContext
         mockMvc.perform(get("/api/auth/me"))
                 .andExpect(status().isUnauthorized())
                 .andExpect(content().string("Not logged in"));

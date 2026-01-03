@@ -1,8 +1,11 @@
 package com.example.chat.service;
 
+import com.example.chat.controller.ChatHistoryController;
 import com.example.chat.model.ChatMessage;
 import com.example.chat.persistence.ChatMessageEntity;
 import com.example.chat.persistence.ChatMessageRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
@@ -12,6 +15,8 @@ import java.util.List;
 @Service
 public class ChatMessageService {
 
+    private static final Logger log = LoggerFactory.getLogger(ChatMessageService.class);
+
     private final ChatMessageRepository chatMessageRepository;
 
     public ChatMessageService(ChatMessageRepository chatMessageRepository) {
@@ -19,6 +24,7 @@ public class ChatMessageService {
     }
 
     public void save(String roomId, String sender, String content) {
+        log.debug("Persisting message roomId={} sender={}", roomId, sender);
         ChatMessageEntity message = new ChatMessageEntity();
         message.setRoomId(roomId);
         message.setSender(sender);
@@ -32,7 +38,8 @@ public class ChatMessageService {
             Long cursorId,
             int limit
     ) {
-        var pageable = PageRequest.of(0, limit); // LIMIT only; NO OFFSET
+        log.debug("Fetching messages roomId={} limit={} cursorCreatedAt={} cursorId={}", roomId, limit, cursorCreatedAt, cursorId);
+        var pageable = PageRequest.of(0, limit);
 
         if (cursorCreatedAt == null || cursorId == null) {
             return chatMessageRepository.findLatestByRoomId(roomId, pageable).stream().map(this::toModel).toList();

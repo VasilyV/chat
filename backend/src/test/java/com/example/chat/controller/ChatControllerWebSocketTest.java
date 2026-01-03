@@ -38,7 +38,8 @@ import static org.mockito.Mockito.*;
                         "org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration," +
                         "org.springframework.boot.autoconfigure.data.jpa.JpaRepositoriesAutoConfiguration," +
                         "org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration," +
-                        "org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration"
+                        "org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration," +
+                        "org.springframework.boot.actuate.autoconfigure.security.servlet.ManagementWebSecurityAutoConfiguration"
         }
 )
 class ChatControllerWebSocketTest {
@@ -75,7 +76,6 @@ class ChatControllerWebSocketTest {
 
     @Test
     void sendMessage_overWebSocket_shouldSendToKafka_andPublishToRedis() throws Exception {
-        // Arrange
         CountDownLatch latch = new CountDownLatch(2);
         doAnswer(inv -> { latch.countDown(); return null; })
                 .when(producer).sendMessage(anyString(), anyString(), anyString());
@@ -95,10 +95,8 @@ class ChatControllerWebSocketTest {
         m.setSender("alice");
         m.setContent("hello");
 
-        // Act: send to @MessageMapping("/chat.sendMessage") with /app prefix
         session.send("/app/chat.sendMessage", m);
 
-        // Assert: wait for async handling
         if (!latch.await(3, TimeUnit.SECONDS)) {
             fail("Timed out waiting for Kafka + Redis calls");
         }

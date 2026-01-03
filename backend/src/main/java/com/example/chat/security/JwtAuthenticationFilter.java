@@ -5,6 +5,8 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -16,6 +18,9 @@ import java.util.Collections;
 import java.util.List;
 
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
+
+    private static final Logger log = LoggerFactory.getLogger(JwtAuthenticationFilter.class);
+
 
     private final JwtTokenProvider tokenProvider;
 
@@ -49,7 +54,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     new UsernamePasswordAuthenticationToken(username, null, authorities);
 
             SecurityContextHolder.getContext().setAuthentication(auth);
+            log.debug("Authenticated request user={}", username);
         } else {
+            log.debug("No valid accessToken cookie for {} {}", request.getMethod(), request.getRequestURI());
             SecurityContextHolder.clearContext();
         }
         filterChain.doFilter(request, response);

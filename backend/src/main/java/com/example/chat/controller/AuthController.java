@@ -1,11 +1,14 @@
 package com.example.chat.controller;
 
+import com.example.chat.config.CookieProperties;
 import com.example.chat.service.AuthService;
 import com.example.chat.persistence.RefreshToken;
 import com.example.chat.persistence.User;
 import com.example.chat.service.UserService;
 import com.example.chat.security.JwtTokenProvider;
 import jakarta.servlet.http.HttpServletResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
@@ -22,18 +25,22 @@ import java.util.UUID;
 @RequestMapping("/api/auth")
 public class AuthController {
 
+    private static final Logger log = LoggerFactory.getLogger(AuthController.class);
+
     private final JwtTokenProvider jwtTokenProvider;
     private final AuthService authService;
     private final UserService userService;
     private final PasswordEncoder passwordEncoder;
+    private final CookieProperties cookieProperties;
 
     public record LoginRequest(String username, String password) {}
 
-    public AuthController(JwtTokenProvider jwtTokenProvider, AuthService authService, UserService userService, PasswordEncoder passwordEncoder) {
+    public AuthController(JwtTokenProvider jwtTokenProvider, AuthService authService, UserService userService, PasswordEncoder passwordEncoder, CookieProperties cookieProperties) {
         this.jwtTokenProvider = jwtTokenProvider;
         this.authService = authService;
         this.userService = userService;
         this.passwordEncoder = passwordEncoder;
+        this.cookieProperties = cookieProperties;
     }
 
     @PostMapping("/register")
@@ -41,6 +48,7 @@ public class AuthController {
         if (loginRequest.username == null || loginRequest.username.isBlank() || loginRequest.password == null || loginRequest.password.isBlank()) {
             return ResponseEntity.badRequest().body("Missing username or password");
         }
+        log.info("Register attempt username={}", loginRequest.username);
 
         if (userService.userExists(loginRequest.username)) {
             return ResponseEntity.badRequest().body("User already exists");
@@ -54,12 +62,15 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest req, HttpServletResponse response) {
+        log.info("Login attempt username={}", req.username);
         var user = userService.findByUsername(req.username);
         if (user.isEmpty()) {
+            log.warn("Login failed username={}", req.username);
             return ResponseEntity.status(401).body("Invalid credentials");
         }
 
         if (!passwordEncoder.matches(req.password, user.get().getPasswordHash())) {
+            log.warn("Login failed username={}", req.username);
             return ResponseEntity.status(401).body("Invalid credentials");
         }
 
@@ -69,11 +80,12 @@ public class AuthController {
 
         ResponseCookie accessCookie = ResponseCookie.from("accessToken", access)
                 .httpOnly(true)
-                .secure(true)
+                .secure(cookieProperties.isSecure())
                 .path("/")
-                .sameSite("None")
+                .sameSite(cookieProperties.getSameSite())
                 .maxAge(60 * 60 * 24 * 30)
                 .build();
+        log.info("Login success username={}", req.username);
 
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, accessCookie.toString())
@@ -86,12 +98,15 @@ public class AuthController {
 
     @PostMapping("/refresh")
     public ResponseEntity<?> refresh(@CookieValue(name = "refreshToken", required = false) String refreshToken) {
+        log.debug("Refresh attempt (cookie present={})", refreshToken != null && !refreshToken.isBlank());
         if (refreshToken == null || refreshToken.isBlank()) {
+            log.warn("Refresh denied (missing/invalid refresh token cookie)");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
         RefreshToken storedRefreshToken = authService.findById(refreshToken).orElse(null);
         if (storedRefreshToken == null) {
+            log.warn("Refresh denied (missing/invalid refresh token cookie)");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .header(HttpHeaders.SET_COOKIE, clearRefreshCookie().toString())
                     .build();
@@ -113,7 +128,10 @@ public class AuthController {
 
     @PostMapping("/logout")
     public ResponseEntity<?> logout(@CookieValue(name = "refreshToken", required = false) String refreshToken) {
+        log.info("Logout called (cookie present={})", refreshToken != null && !refreshToken.isBlank());
         authService.revokeAllForToken(refreshToken);
+        log.info("Logout revoked tokens for refreshToken prefix={}",
+                refreshToken == null ? "null" : refreshToken.substring(0, Math.min(8, refreshToken.length())));
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, clearAccessCookie().toString())
                 .header(HttpHeaders.SET_COOKIE, clearRefreshCookie().toString())
@@ -123,8 +141,8 @@ public class AuthController {
     private ResponseCookie accessCookie(String token) {
         return ResponseCookie.from("accessToken", token)
                 .httpOnly(true)
-                .secure(true)
-                .sameSite("None")
+                .secure(cookieProperties.isSecure())
+                .sameSite(cookieProperties.getSameSite())
                 .path("/")
                 .maxAge(Duration.ofHours(1))
                 .build();
@@ -133,24 +151,24 @@ public class AuthController {
     private ResponseCookie refreshCookie(String token) {
         return ResponseCookie.from("refreshToken", token)
                 .httpOnly(true)
-                .secure(true)
-                .sameSite("None")
-                .path("/api/auth")               // only sent to auth endpoints
+                .secure(cookieProperties.isSecure())
+                .sameSite(cookieProperties.getSameSite())
+                .path("/api/auth")
                 .maxAge(Duration.ofDays(30))
                 .build();
     }
 
     private ResponseCookie clearAccessCookie() {
         return ResponseCookie.from("accessToken", "")
-                .httpOnly(true).secure(true).sameSite("None")
+                .httpOnly(true).secure(true).sameSite(cookieProperties.getSameSite())
                 .path("/").maxAge(0).build();
     }
 
     private ResponseCookie clearRefreshCookie() {
         return ResponseCookie.from("refreshToken", "")
                 .httpOnly(true)
-                .secure(true)
-                .sameSite("None")
+                .secure(cookieProperties.isSecure())
+                .sameSite(cookieProperties.getSameSite())
                 .path("/api/auth")
                 .maxAge(0)
                 .build();

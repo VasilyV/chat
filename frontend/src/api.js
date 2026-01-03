@@ -15,7 +15,6 @@ api.interceptors.response.use(
   (res) => res,
   async (err) => {
     const { response, config } = err;
-    console.log("envBase: " + envBase)
     if (!response) throw err;
 
     // don’t loop

@@ -2,6 +2,8 @@ package com.example.chat.security;
 
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -13,6 +15,9 @@ import java.util.List;
 
 @Component
 public class JwtTokenProvider {
+
+    private static final Logger log = LoggerFactory.getLogger(JwtTokenProvider.class);
+
 
     private final Key key;
     private final long validityMillis;
@@ -39,6 +44,7 @@ public class JwtTokenProvider {
             Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
             return true;
         } catch (JwtException | IllegalArgumentException e) {
+            log.debug("Invalid/expired JWT");
             return false;
         }
     }

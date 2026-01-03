@@ -44,7 +44,6 @@ class ChatKafkaConsumerTest {
                 kafkaTemplate
         );
 
-        // Missing sender -> node.get("sender") is null -> triggers exception
         String payload = "{\"roomId\":\"room1\",\"content\":\"hi\"}";
         consumer.listen(payload, ack);
 

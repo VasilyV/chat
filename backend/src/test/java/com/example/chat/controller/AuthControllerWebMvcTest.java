@@ -91,7 +91,6 @@ class AuthControllerWebMvcTest {
                                 """))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.username").value("alice"))
-                // Cookie matchers look at Set-Cookie headers
                 .andExpect(cookie().exists("accessToken"))
                 .andExpect(cookie().exists("refreshToken"))
                 .andExpect(header().string("Set-Cookie", containsString("accessToken=ACCESS_TOKEN")))
@@ -203,7 +202,6 @@ class AuthControllerWebMvcTest {
         mockMvc.perform(post("/api/auth/logout")
                         .cookie(new Cookie("refreshToken", "RT_ABC")))
                 .andExpect(status().isOk())
-                // These are great because they handle multiple Set-Cookie headers automatically
                 .andExpect(cookie().value("accessToken", ""))
                 .andExpect(cookie().maxAge("accessToken", 0))
                 .andExpect(cookie().value("refreshToken", ""))

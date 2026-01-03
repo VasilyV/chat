@@ -35,6 +35,7 @@ public class SecurityConfig {
                         .authenticationEntryPoint((req, res, ex) -> res.sendError(401))
                 )
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/actuator/health/**", "/actuator/info").permitAll()
                         .requestMatchers("/api/auth/register").permitAll()
                         .requestMatchers("/api/auth/logout").permitAll()
                         .requestMatchers("/api/auth/login", "/api/auth/refresh").permitAll()

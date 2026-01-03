@@ -3,6 +3,8 @@ package com.example.chat.controller;
 import com.example.chat.dto.ChatMessageView;
 import com.example.chat.model.ChatMessage;
 import com.example.chat.service.ChatMessageService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -14,6 +16,8 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/chat")
 public class ChatHistoryController {
+
+    private static final Logger log = LoggerFactory.getLogger(ChatHistoryController.class);
 
     private static final int DEFAULT_LIMIT = 50;
     private static final int MAX_LIMIT = 200;
@@ -32,6 +36,8 @@ public class ChatHistoryController {
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Instant cursorCreatedAt,
             @RequestParam(name = "cursorId", required = false) Long cursorId
     ) {
+        log.debug("Get history roomId={} limit={} cursorCreatedAt={} cursorId={}", roomId, limit, cursorCreatedAt, cursorId);
+
         validateCompleteCursor(cursorCreatedAt, cursorId);
 
         int safeLimit = Math.max(1, Math.min(limit, MAX_LIMIT));
@@ -61,10 +67,9 @@ public class ChatHistoryController {
 
     private void validateCompleteCursor(Instant cursorCreatedAt, Long cursorId) {
         if ((cursorCreatedAt == null) != (cursorId == null)) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
-                    "Both cursorCreatedAt and cursorId must be provided together"
-            );
+            String errorMessage = "Both cursorCreatedAt and cursorId must be provided together";
+            log.warn("{}: cursorCreatedAt={}, cursorId={}", errorMessage, cursorCreatedAt, cursorId);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, errorMessage);
         }
     }
 

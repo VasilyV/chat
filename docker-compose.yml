@@ -1,53 +1,19 @@
 version: '3.8'
 services:
-#  zookeeper:
-#    image: bitnamilegacy/zookeeper:3.8.4
-#    environment:
-#      - ALLOW_ANONYMOUS_LOGIN=yes
-#      - ZOO_HEAP_SIZE=512
-#    ports:
-#      - '2181:2181'
-
-#  kafka:
-#    image: bitnamilegacy/kafka:3
-#    environment:
-#      - KAFKA_HEAP_OPTS=-Xms1g -Xmx1g
-#      - KAFKA_BROKER_ID=1
-#      - KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181
-#      - KAFKA_LISTENERS=PLAINTEXT://:9092
-#      - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092
-#      - ALLOW_PLAINTEXT_LISTENER=yes
-#      - KAFKA_CFG_NUM_PARTITIONS=6
-#      - KAFKA_CFG_LOG_RETENTION_HOURS=1
-#      - KAFKA_CFG_NUM_RECOVERY_THREADS_PER_DATA_DIR=1
-#      - KAFKA_CFG_OFFSETS_TOPIC_REPLICATION_FACTOR=1
-#      - KAFKA_CFG_TRANSACTION_STATE_LOG_REPLICATION_FACTOR=1
-#      - KAFKA_CFG_TRANSACTION_STATE_LOG_MIN_ISR=1
-#      - KAFKA_CFG_ZOOKEEPER_SESSION_TIMEOUT_MS=60000
-#      - KAFKA_CFG_ZOOKEEPER_CONNECTION_TIMEOUT_MS=60000
-#    ports:
-#      - '9092:9092'
-#    depends_on:
-#      - zookeeper
 
   kafka:
     image: apache/kafka:latest
     container_name: kafka
     hostname: kafka
     ports:
-      # external (host) access, optional but handy:
       - "9094:9094"
     environment:
       KAFKA_NODE_ID: "1"
       KAFKA_PROCESS_ROLES: "broker,controller"
 
-      # listeners inside container
       KAFKA_LISTENERS: "PLAINTEXT://:9092,CONTROLLER://:9093,EXTERNAL://:9094"
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: "PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT,EXTERNAL:PLAINTEXT"
 
-      # what clients should use:
-      # - other containers use kafka:9092
-      # - your Mac uses localhost:9094
       KAFKA_ADVERTISED_LISTENERS: "PLAINTEXT://kafka:9092,EXTERNAL://localhost:9094"
 
       KAFKA_CONTROLLER_QUORUM_VOTERS: "1@kafka:9093"
@@ -86,7 +52,6 @@ services:
 
   backend:
     build: ./backend
-    # do NOT bind host port here; only expose inside the docker network
     deploy:
       replicas: 1
     expose:

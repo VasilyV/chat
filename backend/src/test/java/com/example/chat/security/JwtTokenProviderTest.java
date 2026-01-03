@@ -11,7 +11,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 class JwtTokenProviderTest {
 
     private static String base64Secret32Bytes() {
-        // HS256 requires at least 256-bit (32 byte) key material.
         byte[] raw = "01234567890123456789012345678901".getBytes(StandardCharsets.UTF_8);
         return Base64.getEncoder().encodeToString(raw);
     }

@@ -281,10 +281,10 @@ Resources:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
     Properties:
       VpcId: !Ref Vpc
-      TargetType: ip
+      TargetType .gitignore: ip
       Port: 8080
       Protocol: HTTP
-      HealthCheckPath: /api/health
+      HealthCheckPath: /actuator/health
       Matcher:
         HttpCode: "200-399"
 
@@ -477,9 +477,10 @@ Resources:
             - ContainerPort: 8080
               Protocol: tcp
           Environment:
+            - NAME: SPRING_PROFILES_ACTIVE
+              Value: prod
             - Name: JWT_SECRET
               Value: !Ref JwtSecret
-
             - Name: POSTGRES_URL
               Value: !If
                 - DoRds
@@ -489,12 +490,10 @@ Resources:
               Value: !If [DoRds, !Ref DbUsername, !Ref PostgresUser]
             - Name: POSTGRES_PASSWORD
               Value: !If [DoRds, !Ref DbPassword, !Ref PostgresPassword]
-
             - Name: REDIS_HOST
               Value: !If [DoRedis, !GetAtt Redis.PrimaryEndPoint.Address, !Ref RedisHost]
             - Name: REDIS_PORT
               Value: !Ref RedisPort
-
             - Name: KAFKA_BOOTSTRAP_SERVERS
               Value: !Ref KafkaBootstrapServers
 

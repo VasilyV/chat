@@ -89,7 +89,6 @@ class JwtAuthenticationFilterTest {
     void doFilterInternal_shouldClearAuthentication_whenTokenInvalid() throws Exception {
         JwtAuthenticationFilter filter = new JwtAuthenticationFilter(tokenProvider);
 
-        // pre-existing auth
         SecurityContextHolder.getContext().setAuthentication(
                 new org.springframework.security.authentication.UsernamePasswordAuthenticationToken("old", null)
         );

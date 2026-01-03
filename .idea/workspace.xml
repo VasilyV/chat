@@ -4,77 +4,47 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="c686d3c1-8185-474c-ae0b-70bf6515419a" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/encodings.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Dockerfile" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/aws/cloudformation/msk-cluster.yml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/aws/cloudformation/rds-postgres.yml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/Dockerfile" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/db/ddl/create_tables.sql" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/pom.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/example/chat/ChatApplication.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/example/chat/auth/AuthController.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/example/chat/auth/MeController.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/example/chat/auth/RefreshToken.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/example/chat/auth/RefreshTokenRepository.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/example/chat/auth/User.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/example/chat/config/AppConfig.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/example/chat/config/WebSocketConfig.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/example/chat/controller/ChatController.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/example/chat/controller/ChatHistoryController.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/example/chat/kafka/ChatKafkaConsumer.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/example/chat/kafka/ChatKafkaProducer.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/example/chat/kafka/KafkaConfig.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/example/chat/kafka/TopicInitializer.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/example/chat/model/ChatMessage.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/example/chat/persistence/ChatMessageEntity.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/example/chat/persistence/ChatMessageRepository.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/example/chat/persistence/UserRepository.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/example/chat/redis/RedisConfig.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/example/chat/redis/RedisMessageSubscriber.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/example/chat/redis/RedisPublisher.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/example/chat/security/JwtAuthenticationFilter.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/example/chat/security/JwtTokenProvider.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/example/chat/security/SecurityConfig.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/example/chat/service/ChatMessageService.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/src/main/resources/application.properties" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/docker-compose.yml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ecs/backend-taskdef.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ecs/frontend-taskdef.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/frontend/.dockerignore" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/frontend/.env" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/frontend/.idea/.gitignore" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/frontend/.idea/misc.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/frontend/.idea/modules.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/frontend/.idea/vcs.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/frontend/Dockerfile" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/frontend/index.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/frontend/package.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/frontend/src/App.jsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/frontend/src/Register.jsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/frontend/src/api.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/frontend/src/auth.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/frontend/src/components/Chat.jsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/frontend/src/components/Login.jsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/frontend/src/main.jsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/frontend/src/ws.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/frontend/vite.config.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/loadtest/artillery.yaml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/loadtest/generate_tokens.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/loadtest/package-lock.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/loadtest/package.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/loadtest/processor.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/loadtest/tokens.jsonl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/loadtest/user.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/loadtest/users.jsonl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/loadtest/warmup.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/loadtest/warmup.yaml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/nginx.conf" afterDir="false" />
+    <list default="true" id="c686d3c1-8185-474c-ae0b-70bf6515419a" name="Changes" comment="Add cloud formation and aws-related stuff, refactor">
+      <change afterPath="$PROJECT_DIR$/aws/.idea/misc.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/aws/.idea/modules.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/aws/.idea/vcs.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/example/chat/config/CookieProperties.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/example/chat/logging/RequestLoggingFilter.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/resources/application-prod.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/aws/cloudformation/ecs-fargate-safe.yml" beforeDir="false" afterPath="$PROJECT_DIR$/aws/cloudformation/ecs-fargate-safe.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/backend/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/example/chat/ChatApplication.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/example/chat/ChatApplication.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/example/chat/controller/AuthController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/example/chat/controller/AuthController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/example/chat/controller/ChatController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/example/chat/controller/ChatController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/example/chat/controller/ChatHistoryController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/example/chat/controller/ChatHistoryController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/example/chat/controller/MeController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/example/chat/controller/MeController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/example/chat/kafka/ChatKafkaConsumer.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/example/chat/kafka/ChatKafkaConsumer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/example/chat/kafka/ChatKafkaProducer.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/example/chat/kafka/ChatKafkaProducer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/example/chat/kafka/KafkaConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/example/chat/kafka/KafkaConfig.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/example/chat/persistence/RefreshTokenRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/example/chat/persistence/RefreshTokenRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/example/chat/redis/RedisMessageSubscriber.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/example/chat/redis/RedisMessageSubscriber.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/example/chat/redis/RedisPublisher.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/example/chat/redis/RedisPublisher.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/example/chat/security/JwtAuthenticationFilter.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/example/chat/security/JwtAuthenticationFilter.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/example/chat/security/JwtTokenProvider.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/example/chat/security/JwtTokenProvider.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/example/chat/security/SecurityConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/example/chat/security/SecurityConfig.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/example/chat/service/AuthService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/example/chat/service/AuthService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/example/chat/service/ChatMessageService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/example/chat/service/ChatMessageService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/example/chat/service/UserService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/example/chat/service/UserService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/resources/application.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/test/java/com/example/chat/auth/MeControllerTest.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/test/java/com/example/chat/controller/AuthControllerWebMvcTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/test/java/com/example/chat/controller/AuthControllerWebMvcTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/test/java/com/example/chat/controller/ChatControllerWebSocketTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/test/java/com/example/chat/controller/ChatControllerWebSocketTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/test/java/com/example/chat/controller/ChatHistoryControllerTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/test/java/com/example/chat/controller/ChatHistoryControllerTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/test/java/com/example/chat/controller/MeControllerTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/test/java/com/example/chat/controller/MeControllerTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/test/java/com/example/chat/kafka/ChatKafkaConsumerTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/test/java/com/example/chat/kafka/ChatKafkaConsumerTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/test/java/com/example/chat/security/JwtAuthenticationFilterTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/test/java/com/example/chat/security/JwtAuthenticationFilterTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/test/java/com/example/chat/security/JwtTokenProviderTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/test/java/com/example/chat/security/JwtTokenProviderTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docker-compose.yml" beforeDir="false" afterPath="$PROJECT_DIR$/docker-compose.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/Dockerfile" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/Dockerfile" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/api.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/api.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -82,8 +52,7 @@
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
   <component name="EmbeddingIndexingInfo">
-    <option name="cachedIndexableFilesCount" value="29" />
-    <option name="fileBasedEmbeddingIndicesEnabled" value="true" />
+    <option name="cachedIndexableFilesCount" value="31" />
   </component>
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
@@ -117,47 +86,87 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;ASKED_ADD_EXTERNAL_FILES&quot;: &quot;true&quot;,
-    &quot;Docker.Dockerfile.executor&quot;: &quot;Run&quot;,
-    &quot;Docker.backend/Dockerfile.executor&quot;: &quot;Run&quot;,
-    &quot;Docker.docker-compose.yml.backend: Compose Deployment.executor&quot;: &quot;Run&quot;,
-    &quot;Docker.docker-compose.yml.db: Compose Deployment.executor&quot;: &quot;Run&quot;,
-    &quot;Docker.docker-compose.yml.frontend: Compose Deployment.executor&quot;: &quot;Run&quot;,
-    &quot;Docker.docker-compose.yml.kafka: Compose Deployment.executor&quot;: &quot;Run&quot;,
-    &quot;Docker.docker-compose.yml.zookeeper: Compose Deployment.executor&quot;: &quot;Run&quot;,
-    &quot;Docker.docker-compose.yml: Compose Deployment.executor&quot;: &quot;Run&quot;,
-    &quot;Docker.frontend/Dockerfile.executor&quot;: &quot;Run&quot;,
-    &quot;Maven. [package].executor&quot;: &quot;Run&quot;,
-    &quot;Maven.chat [clean].executor&quot;: &quot;Run&quot;,
-    &quot;Maven.chat [install].executor&quot;: &quot;Run&quot;,
-    &quot;Maven.chat [package].executor&quot;: &quot;Run&quot;,
-    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
-    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
-    &quot;com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1&quot;: &quot;true&quot;,
-    &quot;disable.download.node.interpreter.editor.notification&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
-    &quot;junie.onboarding.icon.badge.shown&quot;: &quot;true&quot;,
-    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;/Users/vasily/projects/chat&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;project.structure.last.edited&quot;: &quot;Modules&quot;,
-    &quot;project.structure.proportion&quot;: &quot;0.0&quot;,
-    &quot;project.structure.side.proportion&quot;: &quot;0.0&quot;,
-    &quot;to.speed.mode.migration.done&quot;: &quot;true&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ASKED_ADD_EXTERNAL_FILES": "true",
+    "Docker.Dockerfile.executor": "Run",
+    "Docker.backend/Dockerfile.executor": "Run",
+    "Docker.docker-compose.yml.backend: Compose Deployment.executor": "Run",
+    "Docker.docker-compose.yml.db: Compose Deployment.executor": "Run",
+    "Docker.docker-compose.yml.frontend: Compose Deployment.executor": "Run",
+    "Docker.docker-compose.yml.kafka: Compose Deployment.executor": "Run",
+    "Docker.docker-compose.yml.zookeeper: Compose Deployment.executor": "Run",
+    "Docker.docker-compose.yml: Compose Deployment.executor": "Run",
+    "Docker.frontend/Dockerfile.executor": "Run",
+    "JUnit.AuthControllerWebMvcTest.executor": "Run",
+    "JUnit.AuthControllerWebMvcTest.login_shouldReturn401_whenPasswordMismatch.executor": "Run",
+    "JUnit.AuthControllerWebMvcTest.login_shouldReturn401_whenUserNotFound.executor": "Run",
+    "JUnit.AuthControllerWebMvcTest.login_shouldSetAccessAndRefreshCookies_andReturnUsername.executor": "Run",
+    "JUnit.AuthControllerWebMvcTest.logout_shouldRevokeAndClearCookies_whenCookiePresent.executor": "Run",
+    "JUnit.AuthControllerWebMvcTest.refresh_shouldReturn401_whenNoRefreshCookie.executor": "Run",
+    "JUnit.AuthControllerWebMvcTest.refresh_shouldReturn401_whenRefreshNotFound.executor": "Run",
+    "JUnit.AuthControllerWebMvcTest.refresh_shouldSetNewCookies_whenRefreshValid.executor": "Run",
+    "JUnit.AuthControllerWebMvcTest.register_shouldCallService_andReturnOk.executor": "Run",
+    "JUnit.AuthServiceTest.deleteById_shouldDelegateToRepo.executor": "Run",
+    "JUnit.AuthServiceTest.executor": "Run",
+    "JUnit.AuthServiceTest.findById_shouldReturnRefreshToken.executor": "Run",
+    "JUnit.AuthServiceTest.revokeAllForToken_doesNothing_whenTokenIsBlank.executor": "Run",
+    "JUnit.AuthServiceTest.revokeAllForToken_doesNothing_whenTokenIsNull.executor": "Run",
+    "JUnit.AuthServiceTest.revokeAllForToken_shouldDeleteByUsername_whenTokenFound.executor": "Run",
+    "JUnit.AuthServiceTest.revokeAllForToken_shouldDoNothing_whenTokenMissing.executor": "Run",
+    "JUnit.ChatControllerWebSocketTest.executor": "Run",
+    "JUnit.ChatControllerWebSocketTest.sendMessage_overWebSocket_shouldSendToKafka_andPublishToRedis.executor": "Run",
+    "JUnit.ChatHistoryControllerTest.executor": "Run",
+    "JUnit.ChatHistoryControllerWebMvcSliceTest.executor": "Run",
+    "JUnit.ChatHistoryControllerWebMvcTest.executor": "Debug",
+    "JUnit.ChatHistoryControllerWebMvcTest.getMessages_shouldClampLimitAndFetchLimitPlusOne.executor": "Debug",
+    "JUnit.ChatHistoryControllerWebMvcTest.getMessages_shouldRejectHalfCursor.executor": "Run",
+    "JUnit.ChatHistoryControllerWebMvcTest.getMessages_shouldReturnAccordingToLimitAndHasMoreTrue.executor": "Debug",
+    "JUnit.ChatHistoryControllerWebMvcTest.getMessages_shouldReturnNoCursor_whenNoMoreResults.executor": "Debug",
+    "JUnit.ChatMessageServiceTest.executor": "Run",
+    "JUnit.ChatMessageServiceTest.getMessagesCursor_whenCursorProvided_shouldUseBeforeQuery.executor": "Run",
+    "JUnit.ChatMessageServiceTest.getMessagesCursor_whenNoCursor_shouldUseFindLatestAndMapToModel.executor": "Run",
+    "JUnit.ChatMessageServiceTest.save_shouldPopulateEntityAndDelegateToRepository.executor": "Run",
+    "JUnit.MeControllerTest.executor": "Run",
+    "JUnit.MeControllerTest.me_shouldReturn401_whenNotAuthenticated.executor": "Run",
+    "JUnit.MeControllerTest.me_shouldReturnUsername_whenAuthenticated.executor": "Debug",
+    "JUnit.MeControllerWebMvcTest.executor": "Run",
+    "JUnit.UserServiceTest.executor": "Run",
+    "JUnit.UserServiceTest.findByUsername_delegatesToRepo.executor": "Run",
+    "JUnit.UserServiceTest.save_shouldSaveUserWithUsernameAndPasswordHash.executor": "Run",
+    "JUnit.UserServiceTest.userExists_returnsTrue.executor": "Run",
+    "JUnit.chat in chat.executor": "Run",
+    "JUnit.com.example.chat in chat.executor": "Run",
+    "JUnit.java in chat.executor": "Run",
+    "Maven. [package].executor": "Run",
+    "Maven.chat [clean].executor": "Run",
+    "Maven.chat [install].executor": "Run",
+    "Maven.chat [package].executor": "Run",
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
+    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1": "true",
+    "disable.download.node.interpreter.editor.notification": "true",
+    "git-widget-placeholder": "main",
+    "junie.onboarding.icon.badge.shown": "true",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "/Users/vasily/projects/chat",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "project.structure.last.edited": "Modules",
+    "project.structure.proportion": "0.0",
+    "project.structure.side.proportion": "0.0",
+    "to.speed.mode.migration.done": "true",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$" />
@@ -167,27 +176,95 @@
       <recent name="$PROJECT_DIR$/backend/src/main/java/com" />
       <recent name="$PROJECT_DIR$/backend" />
     </key>
+    <key name="MoveClassesOrPackagesDialog.RECENTS_KEY">
+      <recent name="com.example.chat.service" />
+      <recent name="com.example.chat.controller" />
+      <recent name="com.example.chat.auth" />
+    </key>
   </component>
   <component name="RunAnythingCache">
     <option name="myCommands">
       <command value="mvn package" />
     </option>
   </component>
-  <component name="RunManager" selected="Docker.docker-compose.yml: Compose Deployment">
+  <component name="RunManager" selected="JUnit.chat in chat">
+    <configuration name="AuthControllerWebMvcTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="chat" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="com.example.chat.controller.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="com.example.chat.controller" />
+      <option name="MAIN_CLASS_NAME" value="com.example.chat.controller.AuthControllerWebMvcTest" />
+      <option name="TEST_OBJECT" value="class" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="AuthControllerWebMvcTest.login_shouldSetAccessAndRefreshCookies_andReturnUsername" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="chat" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="com.example.chat.controller.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="com.example.chat.controller" />
+      <option name="MAIN_CLASS_NAME" value="com.example.chat.controller.AuthControllerWebMvcTest" />
+      <option name="METHOD_NAME" value="login_shouldSetAccessAndRefreshCookies_andReturnUsername" />
+      <option name="TEST_OBJECT" value="method" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="AuthControllerWebMvcTest.register_shouldCallService_andReturnOk" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="chat" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="com.example.chat.controller.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="com.example.chat.controller" />
+      <option name="MAIN_CLASS_NAME" value="com.example.chat.controller.AuthControllerWebMvcTest" />
+      <option name="METHOD_NAME" value="register_shouldCallService_andReturnOk" />
+      <option name="TEST_OBJECT" value="method" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="ChatControllerWebSocketTest.sendMessage_overWebSocket_shouldSendToKafka_andPublishToRedis" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="chat" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="com.example.chat.controller.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="com.example.chat.controller" />
+      <option name="MAIN_CLASS_NAME" value="com.example.chat.controller.ChatControllerWebSocketTest" />
+      <option name="METHOD_NAME" value="sendMessage_overWebSocket_shouldSendToKafka_andPublishToRedis" />
+      <option name="TEST_OBJECT" value="method" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="chat in chat" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="chat" />
+      <option name="TEST_OBJECT" value="directory" />
+      <dir value="$PROJECT_DIR$/backend/src/test/java/com/example/chat" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
     <configuration name="ChatApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
       <module name="chat" />
       <option name="SPRING_BOOT_MAIN_CLASS" value="com.example.chat.ChatApplication" />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
-    </configuration>
-    <configuration name="Dockerfile" type="docker-deploy" factoryName="dockerfile" temporary="true" server-name="Docker">
-      <deployment type="dockerfile">
-        <settings>
-          <option name="sourceFilePath" value="Dockerfile" />
-        </settings>
-      </deployment>
-      <method v="2" />
     </configuration>
     <configuration default="true" type="docker-deploy" factoryName="docker-compose.yml" temporary="true">
       <deployment type="docker-compose.yml">
@@ -201,51 +278,13 @@
       </deployment>
       <method v="2" />
     </configuration>
-    <configuration name="docker-compose.yml: Compose Deployment" type="docker-deploy" factoryName="docker-compose.yml" temporary="true" server-name="Docker">
-      <deployment type="docker-compose.yml">
-        <settings>
-          <option name="sourceFilePath" value="docker-compose.yml" />
-        </settings>
-      </deployment>
-      <method v="2" />
-    </configuration>
-    <configuration name="docker-compose.yml.frontend: Compose Deployment" type="docker-deploy" factoryName="docker-compose.yml" temporary="true" server-name="Docker">
-      <deployment type="docker-compose.yml">
-        <settings>
-          <option name="services">
-            <list>
-              <option value="frontend" />
-            </list>
-          </option>
-          <option name="sourceFilePath" value="docker-compose.yml" />
-        </settings>
-      </deployment>
-      <method v="2" />
-    </configuration>
-    <configuration name="frontend/Dockerfile" type="docker-deploy" factoryName="dockerfile" temporary="true" server-name="Docker">
-      <deployment type="dockerfile">
-        <settings>
-          <option name="sourceFilePath" value="frontend/Dockerfile" />
-        </settings>
-      </deployment>
-      <method v="2" />
-    </configuration>
-    <configuration name="build" type="js.build_tools.npm" temporary="true" nameIsGenerated="true">
-      <package-json value="$PROJECT_DIR$/frontend/package.json" />
-      <command value="run" />
-      <scripts>
-        <script value="build" />
-      </scripts>
-      <node-interpreter value="project" />
-      <envs />
-      <method v="2" />
-    </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Docker.docker-compose.yml: Compose Deployment" />
-        <item itemvalue="Docker.frontend/Dockerfile" />
-        <item itemvalue="Docker.Dockerfile" />
-        <item itemvalue="Docker.docker-compose.yml.frontend: Compose Deployment" />
+        <item itemvalue="JUnit.chat in chat" />
+        <item itemvalue="JUnit.ChatControllerWebSocketTest.sendMessage_overWebSocket_shouldSendToKafka_andPublishToRedis" />
+        <item itemvalue="JUnit.AuthControllerWebMvcTest" />
+        <item itemvalue="JUnit.AuthControllerWebMvcTest.register_shouldCallService_andReturnOk" />
+        <item itemvalue="JUnit.AuthControllerWebMvcTest.login_shouldSetAccessAndRefreshCookies_andReturnUsername" />
       </list>
     </recent_temporary>
   </component>
@@ -276,12 +315,100 @@
       <workItem from="1766222206964" duration="8000" />
       <workItem from="1766222432108" duration="3000" />
     </task>
+    <task id="LOCAL-00001" summary="Improve authentication, refactor and add tests">
+      <option name="closed" value="true" />
+      <created>1766918494227</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1766918494227</updated>
+    </task>
+    <task id="LOCAL-00002" summary="Add cloud formation and aws-related stuff, refactor">
+      <option name="closed" value="true" />
+      <created>1766951042321</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1766951042321</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
   </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
+    <MESSAGE value="New frontend" />
+    <MESSAGE value="Improve authentication, refactor and add tests" />
+    <MESSAGE value="Add cloud formation and aws-related stuff, refactor" />
+    <option name="LAST_COMMIT_MESSAGE" value="Add cloud formation and aws-related stuff, refactor" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/backend/src/main/java/com/example/chat/controller/MeController.java</url>
+          <line>21</line>
+          <option name="timeStamp" value="1" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/backend/src/main/java/com/example/chat/controller/MeController.java</url>
+          <line>22</line>
+          <option name="timeStamp" value="2" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/backend/src/main/java/com/example/chat/controller/MeController.java</url>
+          <line>25</line>
+          <option name="timeStamp" value="3" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/backend/src/main/java/com/example/chat/controller/ChatController.java</url>
+          <line>28</line>
+          <option name="timeStamp" value="4" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/backend/src/main/java/com/example/chat/controller/ChatHistoryController.java</url>
+          <line>47</line>
+          <option name="timeStamp" value="13" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/backend/src/main/java/com/example/chat/controller/ChatHistoryController.java</url>
+          <line>42</line>
+          <option name="timeStamp" value="18" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/backend/src/main/java/com/example/chat/controller/ChatHistoryController.java</url>
+          <line>52</line>
+          <option name="timeStamp" value="19" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/backend/src/main/java/com/example/chat/controller/ChatHistoryController.java</url>
+          <line>56</line>
+          <option name="timeStamp" value="20" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/backend/src/main/java/com/example/chat/controller/AuthController.java</url>
+          <line>78</line>
+          <option name="timeStamp" value="22" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/backend/src/main/java/com/example/chat/controller/AuthController.java</url>
+          <line>134</line>
+          <option name="timeStamp" value="23" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
 </project>

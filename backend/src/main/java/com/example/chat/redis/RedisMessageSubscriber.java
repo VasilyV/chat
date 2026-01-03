@@ -3,6 +3,8 @@ package com.example.chat.redis;
 import com.example.chat.model.ChatMessage;
 import com.example.chat.persistence.ChatMessageEntity;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.redis.connection.Message;
 import org.springframework.data.redis.connection.MessageListener;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -12,6 +14,9 @@ import java.nio.charset.StandardCharsets;
 
 @Component
 public class RedisMessageSubscriber implements MessageListener {
+
+    private static final Logger log = LoggerFactory.getLogger(RedisMessageSubscriber.class);
+
 
     private final SimpMessagingTemplate messagingTemplate;
     private final ObjectMapper mapper;
@@ -24,18 +29,16 @@ public class RedisMessageSubscriber implements MessageListener {
 
     @Override
     public void onMessage(Message message, byte[] pattern) {
+        String channel = new String(message.getChannel(), StandardCharsets.UTF_8);
+        log.debug("Redis message received channel={} body={}", channel, message.getBody());
         try {
-            String channel = new String(message.getChannel(), StandardCharsets.UTF_8);
             String body = new String(message.getBody(), StandardCharsets.UTF_8);
-
             String[] parts = channel.split(":");
             String roomId = parts[2];
-
             ChatMessageEntity chatMessage = mapper.readValue(body, ChatMessageEntity.class);
-
             messagingTemplate.convertAndSend("/topic/rooms/" + roomId, chatMessage);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Failed to process Redis message (channel={})", channel, e);
         }
     }
 }
