@@ -2,7 +2,7 @@ package com.example.chat.model;
 
 import java.time.Instant;
 
-public class ChatMessage {
+public class Message {
     private Long id;
     private String roomId;
     private String sender;

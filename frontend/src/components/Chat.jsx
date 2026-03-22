@@ -7,11 +7,11 @@ const PAGE_SIZE = 50;
 
 export default function Chat({ user }) {
   const [room, setRoom] = useState('general');
-  const [messages, setMessages] = useState([]); // UI order: oldest -> newest
+  const [messages, setMessages] = useState([]);
   const [text, setText] = useState('');
 
-  // Cursor pagination state (for "older messages")
-  const [cursor, setCursor] = useState(null); // { sentAt, id } from backend
+
+  const [cursor, setCursor] = useState(null);
   const [hasMore, setHasMore] = useState(true);
   const [loadingHistory, setLoadingHistory] = useState(false);
 
@@ -27,25 +27,21 @@ export default function Chat({ user }) {
         limit: PAGE_SIZE,
       };
 
-      // For older pages, include cursor
       if (!reset && cursor?.createdAt && cursor?.id != null) {
         params.cursorCreatedAt = cursor.createdAt;
-        params.cursorId = cursor.id; // number
+        params.cursorId = cursor.id;
       }
 
       const r = await api.get(`/api/chat/rooms/${encodeURIComponent(room)}/messages`, { params });
 
-      // Expected shape:
-      // { content: [...newest-first], hasMore: boolean, nextCursor: { sentAt, id } | null }
       const data = r.data || {};
       const contentNewestFirst = Array.isArray(data.content) ? data.content : [];
 
-      // We want to display oldest->newest:
       const chunkAscending = [...contentNewestFirst].reverse();
 
       setMessages((prev) => {
-        if (reset) return chunkAscending;         // first page
-        return [...chunkAscending, ...prev];      // prepend older chunk
+        if (reset) return chunkAscending;
+        return [...chunkAscending, ...prev];
       });
 
       setHasMore(!!data.hasMore);
@@ -56,22 +52,18 @@ export default function Chat({ user }) {
   }
 
   useEffect(() => {
-    // Reset on room change
     setMessages([]);
     setCursor(null);
     setHasMore(true);
 
-    // Load first page
     loadHistory({ reset: true }).then(() => {
       const el = listRef.current;
-      if (el) el.scrollTop = el.scrollHeight; // jump to bottom after initial load
+      if (el) el.scrollTop = el.scrollHeight;
     });
 
-    // WS connect + subscribe
     connectWebSocket(room, (msg) => {
-      setMessages((prev) => [...prev, msg]); // newest appended at bottom
+      setMessages((prev) => [...prev, msg]);
 
-      // Auto-scroll if user is near the bottom
       const el = listRef.current;
       if (!el) return;
       const nearBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 120;
@@ -92,12 +84,10 @@ export default function Chat({ user }) {
     const el = listRef.current;
     if (!el || loadingHistory || !hasMore) return;
 
-    // Near the top => load older
     if (el.scrollTop < 80) {
       const prevHeight = el.scrollHeight;
 
       loadHistory().then(() => {
-        // Keep scroll position stable after prepending messages
         requestAnimationFrame(() => {
           const newHeight = el.scrollHeight;
           el.scrollTop = newHeight - prevHeight + el.scrollTop;

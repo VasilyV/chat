@@ -9,13 +9,13 @@ import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
-public interface ChatMessageRepository extends JpaRepository<ChatMessageEntity, UUID> {
+public interface MessageRepository extends JpaRepository<MessageEntity, UUID> {
     @Query("""
         select m from ChatMessageEntity m
         where m.roomId = :roomId
         order by m.createdAt desc, m.id desc
     """)
-    List<ChatMessageEntity> findLatestByRoomId(
+    List<MessageEntity> findLatestByRoomId(
             @Param("roomId") String roomId,
             Pageable pageable
     );
@@ -29,7 +29,7 @@ public interface ChatMessageRepository extends JpaRepository<ChatMessageEntity, 
           )
         order by m.createdAt desc, m.id desc
     """)
-    List<ChatMessageEntity> findByRoomIdBeforeCursor(
+    List<MessageEntity> findByRoomIdBeforeCursor(
             @Param("roomId") String roomId,
             @Param("cursorCreatedAt") Instant cursorCreatedAt,
             @Param("cursorId") Long cursorId,

@@ -12,7 +12,7 @@ Backend is **Spring Boot** (REST + WebSocket/STOMP), frontend is **React (Vite)*
 - Real-time chat via WebSocket + STOMP
 - Persistent message history (Postgres)
 - Message fanout via Redis pub/sub
-- Kafka integration for message publishing (dev via container) to support scalability
+- Kafka integration for message publishing to support scalability
 - Local environment via Docker Compose
 
 ---
@@ -32,8 +32,8 @@ Backend is **Spring Boot** (REST + WebSocket/STOMP), frontend is **React (Vite)*
 - Axios (`withCredentials`)
 - Nginx (serving static build)
 
-**Infra / Deployability**
-- Docker + Docker Compose
+**Infra**
+- Docker 
 - CloudFormation template(s) for AWS ECS Fargate + ALB (optional RDS/ElastiCache)
 
 ---

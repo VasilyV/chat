@@ -1,7 +1,6 @@
 package com.example.chat.redis;
 
-import com.example.chat.model.ChatMessage;
-import com.example.chat.persistence.ChatMessageEntity;
+import com.example.chat.persistence.MessageEntity;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,7 +34,7 @@ public class RedisMessageSubscriber implements MessageListener {
             String body = new String(message.getBody(), StandardCharsets.UTF_8);
             String[] parts = channel.split(":");
             String roomId = parts[2];
-            ChatMessageEntity chatMessage = mapper.readValue(body, ChatMessageEntity.class);
+            MessageEntity chatMessage = mapper.readValue(body, MessageEntity.class);
             messagingTemplate.convertAndSend("/topic/rooms/" + roomId, chatMessage);
         } catch (Exception e) {
             log.error("Failed to process Redis message (channel={})", channel, e);

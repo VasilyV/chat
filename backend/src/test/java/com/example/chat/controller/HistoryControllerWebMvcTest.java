@@ -1,7 +1,7 @@
 package com.example.chat.controller;
 
-import com.example.chat.model.ChatMessage;
-import com.example.chat.service.ChatMessageService;
+import com.example.chat.model.Message;
+import com.example.chat.service.MessageService;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,16 +22,16 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @ContextConfiguration(classes = com.example.chat.ChatApplication.class)
-@WebMvcTest(ChatHistoryController.class)
+@WebMvcTest(HistoryController.class)
 @AutoConfigureMockMvc(addFilters = false)
-class ChatHistoryControllerWebMvcTest {
+class HistoryControllerWebMvcTest {
 
     @Autowired private MockMvc mockMvc;
 
-    @MockBean private ChatMessageService service;
+    @MockBean private MessageService service;
 
-    private static ChatMessage chatMessage(long id, Instant createdAt, String roomId) {
-        ChatMessage msg = new ChatMessage();
+    private static Message chatMessage(long id, Instant createdAt, String roomId) {
+        Message msg = new Message();
         msg.setId(id);
         msg.setCreatedAt(createdAt);
         msg.setRoomId(roomId);

@@ -1,8 +1,8 @@
 package com.example.chat.controller;
 
-import com.example.chat.dto.ChatMessageView;
-import com.example.chat.model.ChatMessage;
-import com.example.chat.service.ChatMessageService;
+import com.example.chat.dto.MessageView;
+import com.example.chat.model.Message;
+import com.example.chat.service.MessageService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -21,25 +21,25 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class ChatHistoryControllerTest {
+class HistoryControllerTest {
 
     @Mock
-    ChatMessageService service;
+    MessageService service;
 
     @InjectMocks
-    ChatHistoryController controller;
+    HistoryController controller;
 
     @Captor
     ArgumentCaptor<Integer> limitCaptor;
 
-    private static ChatMessage chatMessage(long id, Instant createdAt, String roomId) {
-        ChatMessage chatMessage = new ChatMessage();
-        chatMessage.setId(id);
-        chatMessage.setRoomId(roomId);
-        chatMessage.setSender("u" + id);
-        chatMessage.setContent("c" + id);
-        chatMessage.setCreatedAt(createdAt);
-        return chatMessage;
+    private static Message chatMessage(long id, Instant createdAt, String roomId) {
+        Message message = new Message();
+        message.setId(id);
+        message.setRoomId(roomId);
+        message.setSender("u" + id);
+        message.setContent("c" + id);
+        message.setCreatedAt(createdAt);
+        return message;
     }
 
     @Test
@@ -79,7 +79,7 @@ class ChatHistoryControllerTest {
                         chatMessage(1, t1, "room")
                 ));
 
-        ChatHistoryController.CursorPageResponse res = controller.getMessages("room", 2, null, null);
+        HistoryController.CursorPageResponse res = controller.getMessages("room", 2, null, null);
 
         assertThat(res.hasMore()).isTrue();
         assertThat(res.content()).hasSize(2);
@@ -87,7 +87,7 @@ class ChatHistoryControllerTest {
         assertThat(res.nextCursor().createdAt()).isEqualTo(t2);
         assertThat(res.nextCursor().id()).isEqualTo(2L);
 
-        ChatMessageView first = res.content().get(0);
+        MessageView first = res.content().get(0);
         assertThat(first.roomId()).isEqualTo("room");
         assertThat(first.sender()).isEqualTo("u3");
         assertThat(first.content()).isEqualTo("c3");
@@ -105,7 +105,7 @@ class ChatHistoryControllerTest {
                         chatMessage(1, t1, "room")
                 ));
 
-        ChatHistoryController.CursorPageResponse res = controller.getMessages("room", 2, null, null);
+        HistoryController.CursorPageResponse res = controller.getMessages("room", 2, null, null);
 
         assertThat(res.hasMore()).isFalse();
         assertThat(res.content()).hasSize(2);

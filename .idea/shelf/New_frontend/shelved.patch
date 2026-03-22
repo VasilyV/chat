@@ -1,0 +1,95 @@
+Index: frontend/src/api.js
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>import axios from 'axios'\nexport const api=axios.create({baseURL:import.meta.env.VITE_API_URL||'http://localhost:8080',withCredentials:true})\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/frontend/src/api.js b/frontend/src/api.js
+--- a/frontend/src/api.js	(revision 326eabb647a8c1795ed61f4295abdb7ee2fe7327)
++++ b/frontend/src/api.js	(date 1766489704899)
+@@ -1,2 +1,83 @@
+ import axios from 'axios'
+-export const api=axios.create({baseURL:import.meta.env.VITE_API_URL||'http://localhost:8080',withCredentials:true})
++
++const API_BASE = (import.meta.env.VITE_API_URL || 'http://localhost:8080').replace(/\/$/, '')
++
++const ACCESS_KEY = 'chat.accessToken'
++const REFRESH_KEY = 'chat.refreshToken'
++
++export function getAccessToken() {
++  return localStorage.getItem(ACCESS_KEY) || ''
++}
++
++export function getRefreshToken() {
++  return localStorage.getItem(REFRESH_KEY) || ''
++}
++
++export function saveTokens({ accessToken, refreshToken }) {
++  if (accessToken !== undefined) localStorage.setItem(ACCESS_KEY, accessToken || '')
++  if (refreshToken !== undefined) localStorage.setItem(REFRESH_KEY, refreshToken || '')
++}
++
++export function clearTokens() {
++  localStorage.removeItem(ACCESS_KEY)
++  localStorage.removeItem(REFRESH_KEY)
++}
++
++export const api = axios.create({
++  baseURL: API_BASE,
++  timeout: 15000,
++})
++
++api.interceptors.request.use((config) => {
++  const t = getAccessToken()
++  if (t) {
++    config.headers = config.headers || {}
++    config.headers.Authorization = `Bearer ${t}`
++  }
++  return config
++})
++
++let refreshInFlight = null
++
++export async function refreshAccessToken() {
++  const refreshToken = getRefreshToken()
++  if (!refreshToken) throw new Error('No refresh token available')
++
++  if (!refreshInFlight) {
++    refreshInFlight = api
++      .post('/api/auth/refresh', { refreshToken }, { headers: { Authorization: undefined } })
++      .then((res) => {
++        const accessToken = res.data?.accessToken
++        if (!accessToken) throw new Error('Refresh did not return accessToken')
++        setTokens({ accessToken })
++        return accessToken
++      })
++      .finally(() => {
++        refreshInFlight = null
++      })
++  }
++  return refreshInFlight
++}
++
++api.interceptors.response.use(
++  (res) => res,
++  async (error) => {
++    const original = error?.config
++    const status = error?.response?.status
++
++    if (status === 401 && original && !original.__isRetry) {
++      original.__isRetry = true
++      try {
++        const newToken = await refreshAccessToken()
++        original.headers = original.headers || {}
++        original.headers.Authorization = `Bearer ${newToken}`
++        return api(original)
++      } catch {
++        // fall through
++      }
++    }
++    return Promise.reject(error)
++  }
++)
++
++export default api

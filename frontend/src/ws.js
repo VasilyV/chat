@@ -1,4 +1,3 @@
-// src/ws.js
 import { Client } from '@stomp/stompjs';
 
 let client = null;
@@ -30,7 +29,6 @@ export function connectWebSocket(roomId, onMessage) {
       webSocketFactory: () => new WebSocket('ws://localhost:8080/ws-chat'),
       reconnectDelay: 3000,
 
-      // IMPORTANT: set callbacks here (before activate)
       onConnect: () => {
         subscribeToRoom(roomId);
       },
@@ -40,20 +38,16 @@ export function connectWebSocket(roomId, onMessage) {
       onWebSocketError: (e) => {
         console.error('WebSocket error', e);
       },
-      debug: () => {}, // silence
+      debug: () => {},
     });
 
     client.activate();
     return;
   }
 
-  // If client already exists:
-  // - if connected: resubscribe immediately
-  // - if not connected yet: onConnect will subscribe using the latest roomId
   if (client.connected) {
     subscribeToRoom(roomId);
   } else {
-    // Ensure that when it connects, it subscribes to the *current* room
     client.onConnect = () => subscribeToRoom(roomId);
   }
 }

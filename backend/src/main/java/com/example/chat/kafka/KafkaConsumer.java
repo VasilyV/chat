@@ -2,7 +2,7 @@ package com.example.chat.kafka;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.example.chat.service.ChatMessageService;
+import com.example.chat.service.MessageService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -11,17 +11,17 @@ import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.stereotype.Component;
 
 @Component
-public class ChatKafkaConsumer {
+public class KafkaConsumer {
 
-    private static final Logger log = LoggerFactory.getLogger(ChatKafkaConsumer.class);
+    private static final Logger log = LoggerFactory.getLogger(KafkaConsumer.class);
 
     private final ObjectMapper mapper;
-    private final ChatMessageService chatMessageService;
+    private final MessageService messageService;
     private final KafkaTemplate<String, String> kafkaTemplate;
 
-    public ChatKafkaConsumer(ObjectMapper mapper, ChatMessageService chatMessageService, KafkaTemplate<String, String> kafkaTemplate) {
+    public KafkaConsumer(ObjectMapper mapper, MessageService messageService, KafkaTemplate<String, String> kafkaTemplate) {
         this.mapper = mapper;
-        this.chatMessageService = chatMessageService;
+        this.messageService = messageService;
         this.kafkaTemplate = kafkaTemplate;
     }
 
@@ -42,8 +42,7 @@ public class ChatKafkaConsumer {
         String roomId = node.get("roomId").asText();
         String sender = node.get("sender").asText();
         String content = node.get("content").asText();
-        chatMessageService.save(roomId, sender, content);
+        messageService.save(roomId, sender, content);
         log.debug("Saved message roomId={} sender={}", roomId, sender);
-
     }
 }

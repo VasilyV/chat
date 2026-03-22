@@ -1,9 +1,10 @@
 package com.example.chat.controller;
 
 import com.example.chat.config.WebSocketConfig;
-import com.example.chat.kafka.ChatKafkaProducer;
-import com.example.chat.model.ChatMessage;
+import com.example.chat.kafka.KafkaProducer;
+import com.example.chat.model.Message;
 import com.example.chat.redis.RedisPublisher;
+import com.example.chat.service.MessageService;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.AfterEach;
@@ -29,7 +30,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 @SpringBootTest(
-        classes = ChatControllerWebSocketTest.TestApp.class,
+        classes = MessagingControllerWebSocketTest.TestApp.class,
         webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
         properties = {
                 "spring.flyway.enabled=false",
@@ -42,24 +43,24 @@ import static org.mockito.Mockito.*;
                         "org.springframework.boot.actuate.autoconfigure.security.servlet.ManagementWebSecurityAutoConfiguration"
         }
 )
-class ChatControllerWebSocketTest {
+class MessagingControllerWebSocketTest {
 
     @SpringBootConfiguration
     @EnableAutoConfiguration
-    @Import({ ChatController.class, WebSocketConfig.class })
+    @Import({ MessagingController.class, WebSocketConfig.class })
     static class TestApp { }
 
     @LocalServerPort
     int port;
 
     @MockBean
-    ChatKafkaProducer producer;
+    KafkaProducer producer;
 
     @MockBean
     RedisPublisher redisPublisher;
 
     @MockBean
-    com.example.chat.service.ChatMessageService chatMessageService;
+    MessageService messageService;
 
     private WebSocketStompClient stompClient;
     private StompSession session;
@@ -90,7 +91,7 @@ class ChatControllerWebSocketTest {
                 .connectAsync(url, new StompSessionHandlerAdapter() {})
                 .get(3, TimeUnit.SECONDS);
 
-        ChatMessage m = new ChatMessage();
+        Message m = new Message();
         m.setRoomId("room-1");
         m.setSender("alice");
         m.setContent("hello");

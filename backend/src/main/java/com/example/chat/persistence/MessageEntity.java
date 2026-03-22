@@ -9,7 +9,7 @@ import java.time.Instant;
 @Table(name = "chat_messages", indexes = {
         @Index(name = "idx_chat_messages_room_created", columnList = "room_id, created_at")
 })
-public class ChatMessageEntity {
+public class MessageEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -6,7 +6,7 @@ import { api } from './api'
 
 export default function App() {
     const [user, setUser] = useState(null)
-    const [mode, setMode] = useState("login") // login | register
+    const [mode, setMode] = useState("login")
 
     useEffect(() => {
         api.get('/api/auth/me').then(res => {
@@ -15,7 +15,6 @@ export default function App() {
     }, [])
 
     function handleLoggedIn(tokens) {
-        // after login, refresh /me
         api.get('/api/auth/me').then(res => setUser(res.data))
     }
 

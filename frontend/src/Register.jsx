@@ -11,7 +11,7 @@ export default function Register({ onRegistered, onSwitchToLogin }) {
         setError('')
         try {
             await register(username, password)
-            onRegistered(username) // optional
+            onRegistered(username)
         } catch (err) {
             setError("Registration failed: " + (err?.response?.data || "Unknown error"))
         }

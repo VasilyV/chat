@@ -1,17 +1,17 @@
 package com.example.chat.dto;
 
-import com.example.chat.model.ChatMessage;
+import com.example.chat.model.Message;
 
 import java.time.Instant;
 
-public record ChatMessageView(
+public record MessageView(
         String roomId,
         String sender,
         String content,
         Instant createdAt
 ) {
-    public static ChatMessageView fromModel(ChatMessage e) {
-        return new ChatMessageView(
+    public static MessageView fromModel(Message e) {
+        return new MessageView(
                 e.getRoomId(),
                 e.getSender(),
                 e.getContent(),

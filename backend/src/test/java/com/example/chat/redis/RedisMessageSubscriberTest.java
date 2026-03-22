@@ -1,13 +1,12 @@
 package com.example.chat.redis;
 
-import com.example.chat.persistence.ChatMessageEntity;
+import com.example.chat.persistence.MessageEntity;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.redis.connection.DefaultMessage;
@@ -37,7 +36,7 @@ class RedisMessageSubscriberTest {
         ObjectMapper mapper = new ObjectMapper().registerModule(new JavaTimeModule());
         RedisMessageSubscriber subscriber = new RedisMessageSubscriber(messagingTemplate, mapper);
 
-        ChatMessageEntity entity = new ChatMessageEntity();
+        MessageEntity entity = new MessageEntity();
         entity.setRoomId("room-7");
         entity.setSender("alice");
         entity.setContent("hello");
@@ -55,8 +54,8 @@ class RedisMessageSubscriberTest {
         assertThat(destinationCaptor.getValue()).isEqualTo("/topic/rooms/room-7");
 
         Object payload = payloadCaptor.getValue();
-        assertThat(payload).isInstanceOf(ChatMessageEntity.class);
-        ChatMessageEntity forwarded = (ChatMessageEntity) payload;
+        assertThat(payload).isInstanceOf(MessageEntity.class);
+        MessageEntity forwarded = (MessageEntity) payload;
         assertThat(forwarded.getRoomId()).isEqualTo("room-7");
         assertThat(forwarded.getSender()).isEqualTo("alice");
         assertThat(forwarded.getContent()).isEqualTo("hello");

@@ -1,8 +1,8 @@
 package com.example.chat.controller;
 
-import com.example.chat.dto.ChatMessageView;
-import com.example.chat.model.ChatMessage;
-import com.example.chat.service.ChatMessageService;
+import com.example.chat.dto.MessageView;
+import com.example.chat.model.Message;
+import com.example.chat.service.MessageService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -15,16 +15,16 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/chat")
-public class ChatHistoryController {
+public class HistoryController {
 
-    private static final Logger log = LoggerFactory.getLogger(ChatHistoryController.class);
+    private static final Logger log = LoggerFactory.getLogger(HistoryController.class);
 
     private static final int DEFAULT_LIMIT = 50;
     private static final int MAX_LIMIT = 200;
 
-    private final ChatMessageService service;
+    private final MessageService service;
 
-    public ChatHistoryController(ChatMessageService service) {
+    public HistoryController(MessageService service) {
         this.service = service;
     }
 
@@ -41,7 +41,7 @@ public class ChatHistoryController {
         validateCompleteCursor(cursorCreatedAt, cursorId);
 
         int safeLimit = Math.max(1, Math.min(limit, MAX_LIMIT));
-        List<ChatMessage> messages = service.getMessages(roomId, cursorCreatedAt, cursorId, safeLimit + 1);
+        List<Message> messages = service.getMessages(roomId, cursorCreatedAt, cursorId, safeLimit + 1);
 
         boolean hasMore = messages.size() > safeLimit;
         if (hasMore) {
@@ -50,8 +50,8 @@ public class ChatHistoryController {
 
         Cursor nextCursor = getNextCursor(hasMore, messages);
 
-        List<ChatMessageView> content = messages.stream()
-                .map(ChatMessageView::fromModel)
+        List<MessageView> content = messages.stream()
+                .map(MessageView::fromModel)
                 .toList();
 
         return new CursorPageResponse(content, hasMore, nextCursor);
@@ -60,7 +60,7 @@ public class ChatHistoryController {
     public record Cursor(Instant createdAt, Long id) {}
 
     public record CursorPageResponse(
-            List<ChatMessageView> content,
+            List<MessageView> content,
             boolean hasMore,
             Cursor nextCursor
     ) {}
@@ -73,10 +73,10 @@ public class ChatHistoryController {
         }
     }
 
-    private Cursor getNextCursor(boolean hasMore, List<ChatMessage> messages) {
+    private Cursor getNextCursor(boolean hasMore, List<Message> messages) {
         Cursor nextCursor = null;
         if (hasMore && !messages.isEmpty()) {
-            ChatMessage last = messages.getLast();
+            Message last = messages.getLast();
             nextCursor = new Cursor(last.getCreatedAt(), last.getId());
         }
         return nextCursor;

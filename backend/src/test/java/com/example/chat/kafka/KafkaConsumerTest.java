@@ -1,6 +1,6 @@
 package com.example.chat.kafka;
 
-import com.example.chat.service.ChatMessageService;
+import com.example.chat.service.MessageService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -13,34 +13,35 @@ import org.springframework.kafka.support.Acknowledgment;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class ChatKafkaConsumerTest {
+class KafkaConsumerTest {
 
-    @Mock ChatMessageService chatMessageService;
+    @Mock
+    MessageService messageService;
     @Mock KafkaTemplate<String, String> kafkaTemplate;
     @Mock StringRedisTemplate redisTemplate;
     @Mock Acknowledgment ack;
 
     @Test
     void listen_shouldPersistAndAcknowledge_onHappyPath() throws Exception {
-        ChatKafkaConsumer consumer = new ChatKafkaConsumer(
+        KafkaConsumer consumer = new KafkaConsumer(
                 new ObjectMapper(),
-                chatMessageService,
+                messageService,
                 kafkaTemplate
         );
 
         String payload = "{\"roomId\":\"room1\",\"sender\":\"bob\",\"content\":\"hi\"}";
         consumer.listen(payload, ack);
 
-        verify(chatMessageService).save("room1", "bob", "hi");
+        verify(messageService).save("room1", "bob", "hi");
         verify(ack).acknowledge();
         verify(kafkaTemplate, never()).send(eq("chat-messages-dlq"), anyString());
     }
 
     @Test
     void listen_shouldSendToDlq_whenPayloadIsBad() throws Exception {
-        ChatKafkaConsumer consumer = new ChatKafkaConsumer(
+        KafkaConsumer consumer = new KafkaConsumer(
                 new ObjectMapper(),
-                chatMessageService,
+                messageService,
                 kafkaTemplate
         );
 
@@ -49,6 +50,6 @@ class ChatKafkaConsumerTest {
 
         verify(kafkaTemplate).send("chat-messages-dlq", payload);
         verify(ack, never()).acknowledge();
-        verify(chatMessageService, never()).save(anyString(), anyString(), anyString());
+        verify(messageService, never()).save(anyString(), anyString(), anyString());
     }
 }

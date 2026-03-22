@@ -1,0 +1,926 @@
+Index: frontend/src/App.jsx
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>import React, { useState, useEffect } from 'react'\nimport Login from './components/Login'\nimport Register from './Register'\nimport Chat from './components/Chat'\nimport { api } from './api'\n\nexport default function App() {\n    const [user, setUser] = useState(null)\n    const [mode, setMode] = useState(\"login\") // login | register\n\n    useEffect(() => {\n        api.get('/api/auth/me').then(res => {\n            setUser(res.data)\n        }).catch(() => {})\n    }, [])\n\n    function handleLoggedIn(tokens) {\n        // after login, refresh /me\n        api.get('/api/auth/me').then(res => setUser(res.data))\n    }\n\n    function handleRegistered(username) {\n        alert(\"Registered successfully! Now log in.\")\n        setMode(\"login\")\n    }\n\n    if (!user) {\n        return mode === \"login\"\n            ? <Login\n                onLoggedIn={handleLoggedIn}\n                onSwitchToRegister={() => setMode(\"register\")}\n            />\n            : <Register\n                onRegistered={handleRegistered}\n                onSwitchToLogin={() => setMode(\"login\")}\n            />\n    }\n\n    return <Chat user={user}/>\n}\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/frontend/src/App.jsx b/frontend/src/App.jsx
+--- a/frontend/src/App.jsx	(revision 326eabb647a8c1795ed61f4295abdb7ee2fe7327)
++++ b/frontend/src/App.jsx	(date 1766489397026)
+@@ -14,11 +14,16 @@
+         }).catch(() => {})
+     }, [])
+ 
+-    function handleLoggedIn(tokens) {
++    function handleLoggedIn() {
+         // after login, refresh /me
+         api.get('/api/auth/me').then(res => setUser(res.data))
+     }
+ 
++    function handleLogout() {
++        setUser(null)
++        setMode('login')
++    }
++
+     function handleRegistered(username) {
+         alert("Registered successfully! Now log in.")
+         setMode("login")
+@@ -36,5 +41,5 @@
+             />
+     }
+ 
+-    return <Chat user={user}/>
++    return <Chat user={user} onLogout={handleLogout} />
+ }
+Index: frontend/src/main.jsx
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>import React from 'react'\nimport ReactDOM from 'react-dom/client'\nimport App from './App.jsx'\nReactDOM.createRoot(document.getElementById('root')).render(<React.StrictMode><App/></React.StrictMode>)\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/frontend/src/main.jsx b/frontend/src/main.jsx
+--- a/frontend/src/main.jsx	(revision 326eabb647a8c1795ed61f4295abdb7ee2fe7327)
++++ b/frontend/src/main.jsx	(date 1766489397026)
+@@ -1,4 +1,11 @@
+ import React from 'react'
+ import ReactDOM from 'react-dom/client'
+ import App from './App.jsx'
+-ReactDOM.createRoot(document.getElementById('root')).render(<React.StrictMode><App/></React.StrictMode>)
++
++import './styles.css'
++
++ReactDOM.createRoot(document.getElementById('root')).render(
++  <React.StrictMode>
++    <App />
++  </React.StrictMode>
++)
+Index: frontend/src/ws.js
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>// src/ws.js\nimport { Client } from '@stomp/stompjs';\nimport SockJS from 'sockjs-client';\n\nlet client = null;\nlet subscription = null;\n\nexport function connectWebSocket(roomId, onMessage) {\n    if (!client) {\n        client = new Client({\n            webSocketFactory: () => new WebSocket('ws://localhost:8080/ws-chat'),\n            reconnectDelay: 3000,\n        });\n        client.activate();\n    }\n\n    client.onConnect = () => {\n\n        if (subscription) {\n            subscription.unsubscribe();\n        }\n\n        subscription = client.subscribe(`/topic/rooms/${roomId}`, msg => {\n            onMessage(JSON.parse(msg.body));\n        });\n    };\n}\n\nexport function disconnectWebSocket() {\n    if (subscription) {\n        subscription.unsubscribe();\n    }\n    if (client) {\n        client.deactivate();\n        client = null;\n    }\n}\n\n\nexport function sendMessage(roomId, content, sender) {\n    if (!client || !client.connected) {\n        console.warn('sendMessage called but STOMP client not connected');\n        return;\n    }\n\n    const payload = { roomId, content, sender };\n\n    client.publish({\n        destination: '/app/chat.sendMessage', // MUST match @MessageMapping\n        body: JSON.stringify(payload),\n    });\n}\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/frontend/src/ws.js b/frontend/src/ws.js
+--- a/frontend/src/ws.js	(revision 326eabb647a8c1795ed61f4295abdb7ee2fe7327)
++++ b/frontend/src/ws.js	(date 1766496898536)
+@@ -1,52 +1,59 @@
+-// src/ws.js
+-import { Client } from '@stomp/stompjs';
+-import SockJS from 'sockjs-client';
++import SockJS from 'sockjs-client'
++import { Client } from '@stomp/stompjs'
+ 
+-let client = null;
+-let subscription = null;
++let client = null
++let subscription = null
++
++function getSockJsUrl() {
++  // VITE_API_URL is expected to be like: http://localhost:8080
++  const base = (import.meta.env.VITE_API_URL || 'http://localhost:8080').replace(/\/$/, '')
++  return `${base}/ws-chat`
++}
+ 
+ export function connectWebSocket(roomId, onMessage) {
+-    if (!client) {
+-        client = new Client({
+-            webSocketFactory: () => new WebSocket('ws://localhost:8080/ws-chat'),
+-            reconnectDelay: 3000,
+-        });
+-        client.activate();
+-    }
+-
+-    client.onConnect = () => {
++  if (client?.active) return
++
++  const socket = new SockJS(getSockJsUrl())
++  client = new Client({
++    webSocketFactory: () => socket,
++    reconnectDelay: 2000,
++    onConnect: () => {
++      subscription?.unsubscribe()
++      subscription = client.subscribe(`/topic/rooms/${roomId}`, (msg) => {
++        try {
++          onMessage(JSON.parse(msg.body))
++        } catch {
++          // ignore
++        }
++      })
++    },
++  })
+ 
+-        if (subscription) {
+-            subscription.unsubscribe();
+-        }
+-
+-        subscription = client.subscribe(`/topic/rooms/${roomId}`, msg => {
+-            onMessage(JSON.parse(msg.body));
+-        });
+-    };
++  client.activate()
+ }
+ 
+ export function disconnectWebSocket() {
+-    if (subscription) {
+-        subscription.unsubscribe();
+-    }
+-    if (client) {
+-        client.deactivate();
+-        client = null;
+-    }
+-}
+-
++  try {
++    subscription?.unsubscribe()
++  } catch {}
++  subscription = null
+ 
+-export function sendMessage(roomId, content, sender) {
+-    if (!client || !client.connected) {
+-        console.warn('sendMessage called but STOMP client not connected');
+-        return;
+-    }
++  try {
++    client?.deactivate()
++  } catch {}
++  client = null
++}
+ 
+-    const payload = { roomId, content, sender };
+-
+-    client.publish({
+-        destination: '/app/chat.sendMessage', // MUST match @MessageMapping
+-        body: JSON.stringify(payload),
+-    });
++export function sendMessage(roomId, payload) {
++  console.log('sendMessage kicked')
++  if (!client?.connected) {
++    console.log('sendMessage client not connected' + client)
++    return
++  }
++  console.log('sendMessage publishing')
++  client.publish({
++    destination: `/app/rooms/${roomId}`,
++    body: JSON.stringify(payload),
++  })
++  console.log('sendMessage publishing finished')
+ }
+Index: frontend/src/components/Login.jsx
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>import React, { useState } from 'react'\nimport { login } from '../auth'\n\nexport default function Login({ onLoggedIn, onSwitchToRegister }) {\n    const [username, setUsername] = useState('')\n    const [password, setPassword] = useState('')\n    const [error, setError] = useState('')\n\n    async function handleLogin(e) {\n        e.preventDefault()\n        try {\n            let r = await login(username, password)\n            onLoggedIn(r.data)\n        } catch (err) {\n            setError('Invalid credentials')\n        }\n    }\n\n    return (\n        <div style={{padding:20}}>\n            <h2>Login</h2>\n\n            {error && <div style={{color:'red'}}>{error}</div>}\n\n            <form onSubmit={handleLogin}>\n                <input\n                    placeholder=\"Username\"\n                    value={username}\n                    onChange={e => setUsername(e.target.value)}\n                    style={{display:'block', marginBottom:10}}\n                />\n                <input\n                    type=\"password\"\n                    placeholder=\"Password\"\n                    value={password}\n                    onChange={e => setPassword(e.target.value)}\n                    style={{display:'block', marginBottom:10}}\n                />\n                <button>Login</button>\n            </form>\n\n            <button onClick={onSwitchToRegister} style={{marginTop:10}}>\n                No account yet? Register →\n            </button>\n        </div>\n    )\n}\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/frontend/src/components/Login.jsx b/frontend/src/components/Login.jsx
+--- a/frontend/src/components/Login.jsx	(revision 326eabb647a8c1795ed61f4295abdb7ee2fe7327)
++++ b/frontend/src/components/Login.jsx	(date 1766489397026)
+@@ -1,47 +1,81 @@
+-import React, { useState } from 'react'
+-import { login } from '../auth'
++import React, { useMemo, useState } from 'react'
++import { login, setUsername } from '../auth'
+ 
+ export default function Login({ onLoggedIn, onSwitchToRegister }) {
+-    const [username, setUsername] = useState('')
+-    const [password, setPassword] = useState('')
+-    const [error, setError] = useState('')
++  const [username, setU] = useState('')
++  const [password, setP] = useState('')
++  const [error, setError] = useState('')
++  const [loading, setLoading] = useState(false)
+ 
+-    async function handleLogin(e) {
+-        e.preventDefault()
+-        try {
+-            let r = await login(username, password)
+-            onLoggedIn(r.data)
+-        } catch (err) {
+-            setError('Invalid credentials')
+-        }
+-    }
++  const canSubmit = useMemo(() => username.trim().length >= 3 && password.length >= 4, [username, password])
++
++  async function handleSubmit(e) {
++    e.preventDefault()
++    if (!canSubmit || loading) return
++    setError('')
++    setLoading(true)
++    try {
++      await login(username.trim(), password)
++      setUsername(username.trim())
++      onLoggedIn?.()
++    } catch (e) {
++      setError(e?.response?.data?.message || 'Login failed')
++    } finally {
++      setLoading(false)
++    }
++  }
+ 
+-    return (
+-        <div style={{padding:20}}>
+-            <h2>Login</h2>
++  return (
++    <div className="authPage">
++      <div className="authCard">
++        <div className="brand">
++          <div className="brandMark" />
++          <div>
++            <div className="brandName">Chat</div>
++            <div className="brandTag">Fast rooms • WebSocket • Kafka</div>
++          </div>
++        </div>
+ 
+-            {error && <div style={{color:'red'}}>{error}</div>}
++        <h1 className="authTitle">Sign in</h1>
++        <p className="authSubtitle">Use your username & password.</p>
+ 
+-            <form onSubmit={handleLogin}>
+-                <input
+-                    placeholder="Username"
+-                    value={username}
+-                    onChange={e => setUsername(e.target.value)}
+-                    style={{display:'block', marginBottom:10}}
+-                />
+-                <input
+-                    type="password"
+-                    placeholder="Password"
+-                    value={password}
+-                    onChange={e => setPassword(e.target.value)}
+-                    style={{display:'block', marginBottom:10}}
+-                />
+-                <button>Login</button>
+-            </form>
++        <form className="form" onSubmit={handleSubmit}>
++          <div className="formRow">
++            <label className="label">Username</label>
++            <input
++              className="input"
++              value={username}
++              onChange={(e) => setU(e.target.value)}
++              autoComplete="username"
++              placeholder="vasily"
++            />
++          </div>
++          <div className="formRow">
++            <label className="label">Password</label>
++            <input
++              className="input"
++              type="password"
++              value={password}
++              onChange={(e) => setP(e.target.value)}
++              autoComplete="current-password"
++              placeholder="••••••••"
++            />
++          </div>
++
++          {error ? <div className="alert">{error}</div> : null}
++
++          <button className="btn btnPrimary" type="submit" disabled={!canSubmit || loading}>
++            {loading ? 'Signing in…' : 'Sign in'}
++          </button>
++        </form>
+ 
+-            <button onClick={onSwitchToRegister} style={{marginTop:10}}>
+-                No account yet? Register →
+-            </button>
++        <div className="authFooter">
++          <span className="muted">No account?</span>
++          <button className="link" type="button" onClick={onSwitchToRegister}>
++            Create one
++          </button>
+         </div>
+-    )
++      </div>
++    </div>
++  )
+ }
+Index: frontend/src/components/Chat.jsx
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>import React, { useEffect, useState } from 'react';\nimport {connectWebSocket, disconnectWebSocket, sendMessage} from '../ws';\nimport { api } from '../api';\nimport { logout } from '../auth';\n\nexport default function Chat({ user }) {\n    const [room, setRoom] = useState('general');   // <-- now dynamic\n    const [messages, setMessages] = useState([]);\n    const [text, setText] = useState('');\n\n    useEffect(() => {\n        setMessages([]); // reset when room changes\n\n        api.get(`/api/chat/rooms/${room}/messages`)\n            .then(r => setMessages(r.data.reverse()))\n            .catch(err => console.error('History load failed', err));\n\n        connectWebSocket(room, msg => {\n            setMessages(prev => [...prev, msg]);\n        });\n\n        return () => {\n            disconnectWebSocket();   // <— cleanup\n        };\n    }, [room]); // IMPORTANT: re-run on room change\n\n    function handleSend(e) {\n        e.preventDefault();\n        if (!text.trim()) return;\n        sendMessage(room, text, user.username);\n        setText('');\n    }\n\n    async function handleLogout() {\n        await logout();\n        window.location.reload();\n    }\n\n    return (\n        <div style={{ padding: 20 }}>\n            <h3>Logged in as {user.username}</h3>\n            <button onClick={handleLogout}>Logout</button>\n\n            <div style={{ marginTop: 20 }}>\n                <label>Select Room: </label>\n                <select\n                    value={room}\n                    onChange={e => setRoom(e.target.value)}\n                >\n                    <option value=\"general\">general</option>\n                    <option value=\"sports\">sports</option>\n                    <option value=\"music\">music</option>\n                    <option value=\"finland\">finland</option>\n                    <option value=\"cats\">cats</option>\n                </select>\n            </div>\n\n            <div\n                style={{\n                    border: '1px solid #ccc',\n                    height: 400,\n                    overflowY: 'scroll',\n                    padding: 10,\n                    marginTop: 10\n                }}\n            >\n                {messages.map((m, i) => (\n                    <div key={i}>\n                        <b>{m.sender}:</b> {m.content}\n                    </div>\n                ))}\n            </div>\n\n            <form onSubmit={handleSend}>\n                <input\n                    value={text}\n                    onChange={e => setText(e.target.value)}\n                    placeholder=\"Type...\"\n                    style={{ width: '80%' }}\n                />\n                <button type=\"submit\">Send</button>\n            </form>\n        </div>\n    );\n}\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/frontend/src/components/Chat.jsx b/frontend/src/components/Chat.jsx
+--- a/frontend/src/components/Chat.jsx	(revision 326eabb647a8c1795ed61f4295abdb7ee2fe7327)
++++ b/frontend/src/components/Chat.jsx	(date 1766489397026)
+@@ -1,85 +1,345 @@
+-import React, { useEffect, useState } from 'react';
+-import {connectWebSocket, disconnectWebSocket, sendMessage} from '../ws';
+-import { api } from '../api';
+-import { logout } from '../auth';
++import React, { useEffect, useMemo, useRef, useState } from 'react'
++import { api } from '../api'
++import { getUsername, logout } from '../auth'
++import { connectWebSocket, disconnectWebSocket, sendMessage } from '../ws'
++
++function formatTime(iso) {
++  try {
++    const d = new Date(iso)
++    return d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })
++  } catch {
++    return ''
++  }
++}
++
++function normalizeErr(e) {
++  const msg = e?.response?.data?.message || e?.message || 'Something went wrong'
++  return typeof msg === 'string' ? msg : JSON.stringify(msg)
++}
++
++function useLocalStorageList(key, fallback = []) {
++  const [value, setValue] = useState(() => {
++    try {
++      const raw = localStorage.getItem(key)
++      if (!raw) return fallback
++      const parsed = JSON.parse(raw)
++      return Array.isArray(parsed) ? parsed : fallback
++    } catch {
++      return fallback
++    }
++  })
++
++  useEffect(() => {
++    try {
++      localStorage.setItem(key, JSON.stringify(value))
++    } catch {
++      // ignore
++    }
++  }, [key, value])
++
++  return [value, setValue]
++}
++
++export default function Chat({ user, onLogout }) {
++  const [rooms, setRooms] = useLocalStorageList('chat.rooms', ['general'])
++  const [roomInput, setRoomInput] = useState('')
++  const [roomId, setRoomId] = useState(rooms[0] || 'general')
++
++  const [sender, setSender] = useState(getUsername() || user?.username || '')
++  const [draft, setDraft] = useState('')
++
++  const [messages, setMessages] = useState([])
++  const [cursor, setCursor] = useState(null)
++  const [hasMore, setHasMore] = useState(true)
++  const [loadingMore, setLoadingMore] = useState(false)
++
++  const [connected, setConnected] = useState(false)
++  const [error, setError] = useState('')
++  const listRef = useRef(null)
++  const shouldStickToBottomRef = useRef(true)
++
++  const roomLabel = useMemo(() => (roomId?.trim() ? `#${roomId}` : ''), [roomId])
++
++  function addRoom(id) {
++    const v = id.trim()
++    if (!v) return
++    setRooms((prev) => {
++      const next = [v, ...prev.filter((r) => r !== v)]
++      return next.slice(0, 20)
++    })
++    setRoomId(v)
++    setRoomInput('')
++  }
++
++  function removeRoom(id) {
++    setRooms((prev) => {
++      const next = prev.filter((r) => r !== id)
++      if (roomId === id) setRoomId(next[0] || 'general')
++      return next
++    })
++  }
++
++  async function loadInitial() {
++    setError('')
++    setHasMore(true)
++    setCursor(null)
++    try {
++      const { data } = await api.get(`/rooms/${encodeURIComponent(roomId)}/messages`, {
++        params: { limit: 30 },
++      })
++      setMessages(Array.isArray(data?.items) ? data.items : [])
++      setCursor(data?.nextCursor || null)
++      setHasMore(Boolean(data?.nextCursor))
++
++      // jump to bottom after initial load
++      requestAnimationFrame(() => {
++        const el = listRef.current
++        if (!el) return
++        el.scrollTop = el.scrollHeight
++      })
++    } catch (e) {
++      setError(normalizeErr(e))
++      setMessages([])
++      setCursor(null)
++      setHasMore(false)
++    }
++  }
++
++  async function loadOlder() {
++    if (!hasMore || loadingMore || !cursor) return
++    setLoadingMore(true)
++    setError('')
++    const el = listRef.current
++    const prevHeight = el?.scrollHeight || 0
+ 
+-export default function Chat({ user }) {
+-    const [room, setRoom] = useState('general');   // <-- now dynamic
+-    const [messages, setMessages] = useState([]);
+-    const [text, setText] = useState('');
++    try {
++      const { data } = await api.get(`/rooms/${encodeURIComponent(roomId)}/messages`, {
++        params: {
++          limit: 30,
++          cursorCreatedAt: cursor.createdAt,
++          cursorId: cursor.id,
++        },
++      })
++      const older = Array.isArray(data?.items) ? data.items : []
++      setMessages((prev) => [...older, ...prev])
++      setCursor(data?.nextCursor || null)
++      setHasMore(Boolean(data?.nextCursor))
++
++      // keep scroll position stable
++      requestAnimationFrame(() => {
++        const el2 = listRef.current
++        if (!el2) return
++        const newHeight = el2.scrollHeight
++        el2.scrollTop = newHeight - prevHeight
++      })
++    } catch (e) {
++      setError(normalizeErr(e))
++    } finally {
++      setLoadingMore(false)
++    }
++  }
+ 
+-    useEffect(() => {
+-        setMessages([]); // reset when room changes
++  useEffect(() => {
++    if (!roomId) return
+ 
+-        api.get(`/api/chat/rooms/${room}/messages`)
+-            .then(r => setMessages(r.data.reverse()))
+-            .catch(err => console.error('History load failed', err));
++    // (re)connect to the selected room
++    disconnectWebSocket()
++    setConnected(false)
+ 
+-        connectWebSocket(room, msg => {
+-            setMessages(prev => [...prev, msg]);
+-        });
++    const stop = connectWebSocket(
++      roomId,
++      (msg) => {
++        setMessages((prev) => [...prev, msg])
++        if (shouldStickToBottomRef.current) {
++          requestAnimationFrame(() => {
++            const el = listRef.current
++            if (!el) return
++            el.scrollTop = el.scrollHeight
++          })
++        }
++      },
++      () => setConnected(true),
++      () => setConnected(false),
++    )
++
++    loadInitial()
+ 
+-        return () => {
+-            disconnectWebSocket();   // <— cleanup
+-        };
+-    }, [room]); // IMPORTANT: re-run on room change
++    return () => {
++      stop?.()
++      disconnectWebSocket()
++    }
++    // eslint-disable-next-line react-hooks/exhaustive-deps
++  }, [roomId])
+ 
+-    function handleSend(e) {
+-        e.preventDefault();
+-        if (!text.trim()) return;
+-        sendMessage(room, text, user.username);
+-        setText('');
++  useEffect(() => {
++    // keep default sender in sync with saved username
++    if (!sender) {
++      const u = getUsername() || user?.username || ''
++      if (u) setSender(u)
+     }
++  }, [sender, user?.username])
+ 
+-    async function handleLogout() {
+-        await logout();
+-        window.location.reload();
+-    }
++  function handleScroll() {
++    const el = listRef.current
++    if (!el) return
++    const nearBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 120
++    shouldStickToBottomRef.current = nearBottom
++  }
++
++  function submit(e) {
++    e.preventDefault()
++    setError('')
++    const text = draft.trim()
++    const from = sender.trim()
++    if (!text || !from) return
++    sendMessage(roomId, { sender: from, content: text })
++    setDraft('')
++    requestAnimationFrame(() => {
++      const el = listRef.current
++      if (!el) return
++      el.scrollTop = el.scrollHeight
++    })
++  }
++
++  function doLogout() {
++    disconnectWebSocket()
++    logout()
++    onLogout?.()
++  }
+ 
+-    return (
+-        <div style={{ padding: 20 }}>
+-            <h3>Logged in as {user.username}</h3>
+-            <button onClick={handleLogout}>Logout</button>
+-
+-            <div style={{ marginTop: 20 }}>
+-                <label>Select Room: </label>
+-                <select
+-                    value={room}
+-                    onChange={e => setRoom(e.target.value)}
+-                >
+-                    <option value="general">general</option>
+-                    <option value="sports">sports</option>
+-                    <option value="music">music</option>
+-                    <option value="finland">finland</option>
+-                    <option value="cats">cats</option>
+-                </select>
++  return (
++    <div className="chatShell">
++      <aside className="sidebar">
++        <div className="sidebarHeader">
++          <div>
++            <div className="brand">Chat</div>
++            <div className="muted" style={{ marginTop: 2 }}>
++              Signed in as <span className="chip">{user?.username || 'user'}</span>
+             </div>
+-
+-            <div
+-                style={{
+-                    border: '1px solid #ccc',
+-                    height: 400,
+-                    overflowY: 'scroll',
+-                    padding: 10,
+-                    marginTop: 10
+-                }}
+-            >
+-                {messages.map((m, i) => (
+-                    <div key={i}>
+-                        <b>{m.sender}:</b> {m.content}
+-                    </div>
+-                ))}
+-            </div>
++          </div>
++          <button className="btn btnGhost" onClick={doLogout} title="Log out">
++            Logout
++          </button>
++        </div>
+ 
+-            <form onSubmit={handleSend}>
+-                <input
+-                    value={text}
+-                    onChange={e => setText(e.target.value)}
+-                    placeholder="Type..."
+-                    style={{ width: '80%' }}
+-                />
+-                <button type="submit">Send</button>
+-            </form>
++        <div className="sidebarSection">
++          <div className="sectionTitle">Rooms</div>
++          <div className="roomList">
++            {rooms.map((r) => (
++              <div key={r} className={`roomItem ${r === roomId ? 'roomItemActive' : ''}`}>
++                <button className="roomBtn" onClick={() => setRoomId(r)}>
++                  <span className="mono">#{r}</span>
++                </button>
++                <button
++                  className="iconBtn"
++                  onClick={() => removeRoom(r)}
++                  title="Remove"
++                  aria-label={`Remove room ${r}`}
++                >
++                  ×
++                </button>
++              </div>
++            ))}
++          </div>
++
++          <form
++            className="row"
++            onSubmit={(e) => {
++              e.preventDefault()
++              addRoom(roomInput)
++            }}
++            style={{ marginTop: 12 }}
++          >
++            <input
++              className="input"
++              placeholder="Join / create room"
++              value={roomInput}
++              onChange={(e) => setRoomInput(e.target.value)}
++            />
++            <button className="btn" type="submit" disabled={!roomInput.trim()}>
++              Join
++            </button>
++          </form>
+         </div>
+-    );
++
++        <div className="sidebarSection">
++          <div className="sectionTitle">Display name</div>
++          <input
++            className="input"
++            placeholder="How your messages appear"
++            value={sender}
++            onChange={(e) => setSender(e.target.value)}
++          />
++          <div className="muted" style={{ marginTop: 8, lineHeight: 1.3 }}>
++            Tip: this is just the <span className="mono">sender</span> field sent in the message payload.
++          </div>
++        </div>
++      </aside>
++
++      <main className="main">
++        <header className="mainHeader">
++          <div>
++            <div className="headline">{roomLabel}</div>
++            <div className="muted">
++              <span className={`statusDot ${connected ? 'statusOnline' : 'statusOffline'}`} />
++              {connected ? 'Live' : 'Reconnecting…'}
++            </div>
++          </div>
++          <div className="headerRight">
++            {hasMore && (
++              <button className="btn btnGhost" onClick={loadOlder} disabled={loadingMore}>
++                {loadingMore ? 'Loading…' : 'Load older'}
++              </button>
++            )}
++          </div>
++        </header>
++
++        {error && <div className="alert">{error}</div>}
++
++        <div className="messageList" ref={listRef} onScroll={handleScroll}>
++          {messages.length === 0 ? (
++            <div className="emptyState">
++              <div className="emptyTitle">No messages yet</div>
++              <div className="muted">Send the first message to start the conversation.</div>
++            </div>
++          ) : (
++            messages.map((m) => {
++              const isMe = sender?.trim() && m?.sender === sender.trim()
++              return (
++                <div key={m.id ?? `${m.sender}-${m.createdAt}-${Math.random()}`} className={`msgRow ${isMe ? 'msgRowMe' : ''}`}>
++                  <div className={`msgBubble ${isMe ? 'msgMe' : 'msgOther'}`}>
++                    <div className="msgMeta">
++                      <span className="msgSender">{m.sender}</span>
++                      <span className="msgTime">{formatTime(m.createdAt)}</span>
++                    </div>
++                    <div className="msgText">{m.content}</div>
++                  </div>
++                </div>
++              )
++            })
++          )}
++        </div>
++
++        <form className="composer" onSubmit={submit}>
++          <textarea
++            className="textarea"
++            placeholder="Write a message…"
++            value={draft}
++            onChange={(e) => setDraft(e.target.value)}
++            onKeyDown={(e) => {
++              if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
++                submit(e)
++              }
++            }}
++          />
++          <button className="btn" type="submit" disabled={!draft.trim() || !sender.trim()}>
++            Send
++          </button>
++        </form>
++        <div className="composerHint muted">
++          Press <span className="kbd">Ctrl</span>+<span className="kbd">Enter</span> to send.
++        </div>
++      </main>
++    </div>
++  )
+ }
+Index: frontend/src/Register.jsx
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>import React, { useState } from 'react'\nimport { register } from './auth'\n\nexport default function Register({ onRegistered, onSwitchToLogin }) {\n    const [username, setUsername] = useState('')\n    const [password, setPassword] = useState('')\n    const [error, setError] = useState('')\n\n    async function handleRegister(e) {\n        e.preventDefault()\n        setError('')\n        try {\n            await register(username, password)\n            onRegistered(username) // optional\n        } catch (err) {\n            setError(\"Registration failed: \" + (err?.response?.data || \"Unknown error\"))\n        }\n    }\n\n    return (\n        <div style={{padding:20}}>\n            <h2>Register</h2>\n\n            {error && <div style={{color:'red', marginBottom:10}}>{error}</div>}\n\n            <form onSubmit={handleRegister}>\n                <input\n                    placeholder=\"Username\"\n                    value={username}\n                    onChange={e => setUsername(e.target.value)}\n                    style={{display:'block', marginBottom:10}}\n                />\n                <input\n                    placeholder=\"Password\"\n                    value={password}\n                    type=\"password\"\n                    onChange={e => setPassword(e.target.value)}\n                    style={{display:'block', marginBottom:10}}\n                />\n                <button>Register</button>\n            </form>\n\n            <button onClick={onSwitchToLogin} style={{marginTop:10}}>\n                Already have an account? Login →\n            </button>\n        </div>\n    )\n}\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/frontend/src/Register.jsx b/frontend/src/Register.jsx
+--- a/frontend/src/Register.jsx	(revision 326eabb647a8c1795ed61f4295abdb7ee2fe7327)
++++ b/frontend/src/Register.jsx	(date 1766489397026)
+@@ -1,48 +1,77 @@
+-import React, { useState } from 'react'
+-import { register } from './auth'
++import React, { useMemo, useState } from 'react'
++import { register, setUsername } from './auth'
+ 
+ export default function Register({ onRegistered, onSwitchToLogin }) {
+-    const [username, setUsername] = useState('')
+-    const [password, setPassword] = useState('')
+-    const [error, setError] = useState('')
++  const [username, setU] = useState('')
++  const [password, setP] = useState('')
++  const [error, setError] = useState('')
++  const [loading, setLoading] = useState(false)
++
++  const canSubmit = useMemo(() => username.trim().length >= 3 && password.length >= 6 && !loading, [username, password, loading])
+ 
+-    async function handleRegister(e) {
+-        e.preventDefault()
+-        setError('')
+-        try {
+-            await register(username, password)
+-            onRegistered(username) // optional
+-        } catch (err) {
+-            setError("Registration failed: " + (err?.response?.data || "Unknown error"))
+-        }
+-    }
++  async function handleRegister(e) {
++    e.preventDefault()
++    if (!canSubmit) return
++    setError('')
++    setLoading(true)
++    try {
++      await register(username.trim(), password)
++      setUsername(username.trim())
++      onRegistered?.()
++    } catch (err) {
++      const msg = err?.response?.data?.message || err?.message || 'Register failed'
++      setError(msg)
++    } finally {
++      setLoading(false)
++    }
++  }
+ 
+-    return (
+-        <div style={{padding:20}}>
+-            <h2>Register</h2>
++  return (
++    <div className="authPage">
++      <div className="authCard">
++        <div>
++          <div className="brand" style={{ marginBottom: 8 }}>Chat</div>
++          <div className="helper" style={{ marginBottom: 16 }}>Create an account</div>
++        </div>
+ 
+-            {error && <div style={{color:'red', marginBottom:10}}>{error}</div>}
++        {error && <div className="toast toast--error">{error}</div>}
+ 
+-            <form onSubmit={handleRegister}>
+-                <input
+-                    placeholder="Username"
+-                    value={username}
+-                    onChange={e => setUsername(e.target.value)}
+-                    style={{display:'block', marginBottom:10}}
+-                />
+-                <input
+-                    placeholder="Password"
+-                    value={password}
+-                    type="password"
+-                    onChange={e => setPassword(e.target.value)}
+-                    style={{display:'block', marginBottom:10}}
+-                />
+-                <button>Register</button>
+-            </form>
+-
+-            <button onClick={onSwitchToLogin} style={{marginTop:10}}>
+-                Already have an account? Login →
+-            </button>
+-        </div>
+-    )
++        <form onSubmit={handleRegister} className="stack">
++          <div className="field">
++            <label className="label">Username</label>
++            <input
++              className="input"
++              value={username}
++              onChange={(e) => setU(e.target.value)}
++              placeholder="e.g. vasily"
++              autoComplete="username"
++            />
++          </div>
++
++          <div className="field">
++            <label className="label">Password</label>
++            <input
++              className="input"
++              type="password"
++              value={password}
++              onChange={(e) => setP(e.target.value)}
++              placeholder="At least 6 characters"
++              autoComplete="new-password"
++            />
++          </div>
++
++          <button className="btn btn--primary" disabled={!canSubmit}>
++            {loading ? 'Creating…' : 'Create account'}
++          </button>
++
++          <div className="helper" style={{ textAlign: 'center' }}>
++            Already have an account?{' '}
++            <button type="button" className="link" onClick={onSwitchToLogin}>
++              Sign in
++            </button>
++          </div>
++        </form>
++      </div>
++    </div>
++  )
+ }
+Index: frontend/src/auth.js
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>import { api } from './api'\n\nexport async function register(username, password) {\n    return api.post('/api/auth/register', {username, password})\n}\n\nexport async function login(username, password) {\n    return api.post('/api/auth/login', {username, password})\n}\n\nexport async function logout() {\n    return api.post('/api/auth/logout')\n}\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/frontend/src/auth.js b/frontend/src/auth.js
+--- a/frontend/src/auth.js	(revision 326eabb647a8c1795ed61f4295abdb7ee2fe7327)
++++ b/frontend/src/auth.js	(date 1766489397026)
+@@ -1,13 +1,52 @@
+-import { api } from './api'
++import { api, clearTokens, getRefreshToken, saveTokens } from './api'
++
++const USERNAME_KEY = 'chat.username'
++
++export function getUsername() {
++  return localStorage.getItem(USERNAME_KEY) || ''
++}
++
++export function setUsername(username) {
++  localStorage.setItem(USERNAME_KEY, username)
++}
++
++export function logout() {
++  clearTokens()
++  localStorage.removeItem(USERNAME_KEY)
++}
+ 
+ export async function register(username, password) {
+-    return api.post('/api/auth/register', {username, password})
++  // register does not log in; we keep UX simple: take user back to login
++  await api.post('/api/auth/register', { username, password })
+ }
+ 
+ export async function login(username, password) {
+-    return api.post('/api/auth/login', {username, password})
+-}
++  const { data } = await api.post('/api/auth/login', { username, password })
++
++  // Backend returns a refreshToken. We immediately exchange it for an access token.
++  const refreshToken = data?.refreshToken
++  if (!refreshToken) {
++    throw new Error('Login succeeded, but refresh token was missing')
++  }
++
++  setUsername(username)
++
++  const refreshed = await api.post('/api/auth/refresh', { refreshToken })
++  const accessToken = refreshed?.data?.accessToken
++  if (!accessToken) {
++    throw new Error('Refresh succeeded, but access token was missing')
++  }
+ 
+-export async function logout() {
+-    return api.post('/api/auth/logout')
++  saveTokens({ accessToken, refreshToken })
++  return { username, accessToken }
++}
++
++export async function refreshSession() {
++  const refreshToken = getRefreshToken()
++  if (!refreshToken) throw new Error('No refresh token')
++  const { data } = await api.post('/api/auth/refresh', { refreshToken })
++  const accessToken = data?.accessToken
++  if (!accessToken) throw new Error('No access token in refresh response')
++  saveTokens({ accessToken, refreshToken })
++  return accessToken
+ }
