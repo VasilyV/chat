@@ -11,8 +11,8 @@ public class TopicInitializer {
 
     public TopicInitializer(AdminClient admin) {
         List<NewTopic> topics = List.of(
-                new NewTopic("chat-messages", 10, (short) 1),
-                new NewTopic("chat-messages-dlq", 10, (short) 1)
+                new NewTopic("chat-messages", 10, (short) 3),
+                new NewTopic("chat-messages-dlq", 10, (short) 3)
         );
 
         admin.createTopics(topics);

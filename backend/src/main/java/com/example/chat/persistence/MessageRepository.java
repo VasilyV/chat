@@ -11,7 +11,7 @@ import java.util.UUID;
 
 public interface MessageRepository extends JpaRepository<MessageEntity, UUID> {
     @Query("""
-        select m from ChatMessageEntity m
+        select m from MessageEntity m
         where m.roomId = :roomId
         order by m.createdAt desc, m.id desc
     """)
@@ -21,7 +21,7 @@ public interface MessageRepository extends JpaRepository<MessageEntity, UUID> {
     );
 
     @Query("""
-        select m from ChatMessageEntity m
+        select m from MessageEntity m
         where m.roomId = :roomId
           and (
                 m.createdAt < :cursorCreatedAt
