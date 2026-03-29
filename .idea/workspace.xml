@@ -4,13 +4,12 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="c686d3c1-8185-474c-ae0b-70bf6515419a" name="Changes" comment="Add README, tune up cookie authentication, add logging">
+    <list default="true" id="c686d3c1-8185-474c-ae0b-70bf6515419a" name="Changes" comment="Add concurrent processing (3) for consuming the messages from Kafka, add replication factor (3), add more instances of the backend app (5), fix wrong naming,">
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/example/chat/service/RateLimiterService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/test/java/com/example/chat/service/RateLimiterServiceTest.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/example/chat/kafka/KafkaConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/example/chat/kafka/KafkaConfig.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/example/chat/kafka/TopicInitializer.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/example/chat/kafka/TopicInitializer.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/example/chat/persistence/MessageRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/example/chat/persistence/MessageRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/resources/db/migration/V3__create_chat_messages_table.sql" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/resources/db/migration/V3__create_chat_messages_table.sql" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docker-compose.yml" beforeDir="false" afterPath="$PROJECT_DIR$/docker-compose.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/example/chat/controller/MessagingController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/example/chat/controller/MessagingController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/test/java/com/example/chat/controller/MessagingControllerWebSocketTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/test/java/com/example/chat/controller/MessagingControllerWebSocketTest.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -29,6 +28,7 @@
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+    <option name="UPDATE_TYPE" value="REBASE" />
   </component>
   <component name="HighlightingSettingsPerFile">
     <setting file="jar://$USER_HOME$/.ideaLibSources/spring-security-config-6.2.0-sources.jar!/org/springframework/security/config/annotation/web/configurers/LogoutConfigurer.java" root0="SKIP_INSPECTION" />
@@ -52,87 +52,93 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;ASKED_ADD_EXTERNAL_FILES&quot;: &quot;true&quot;,
-    &quot;Docker.Dockerfile.executor&quot;: &quot;Run&quot;,
-    &quot;Docker.backend/Dockerfile.executor&quot;: &quot;Run&quot;,
-    &quot;Docker.docker-compose.yml.backend: Compose Deployment.executor&quot;: &quot;Run&quot;,
-    &quot;Docker.docker-compose.yml.db: Compose Deployment.executor&quot;: &quot;Run&quot;,
-    &quot;Docker.docker-compose.yml.frontend: Compose Deployment.executor&quot;: &quot;Run&quot;,
-    &quot;Docker.docker-compose.yml.kafka: Compose Deployment.executor&quot;: &quot;Run&quot;,
-    &quot;Docker.docker-compose.yml.zookeeper: Compose Deployment.executor&quot;: &quot;Run&quot;,
-    &quot;Docker.docker-compose.yml: Compose Deployment.executor&quot;: &quot;Run&quot;,
-    &quot;Docker.frontend/Dockerfile.executor&quot;: &quot;Run&quot;,
-    &quot;JUnit.AuthControllerWebMvcTest.executor&quot;: &quot;Run&quot;,
-    &quot;JUnit.AuthControllerWebMvcTest.login_shouldReturn401_whenPasswordMismatch.executor&quot;: &quot;Run&quot;,
-    &quot;JUnit.AuthControllerWebMvcTest.login_shouldReturn401_whenUserNotFound.executor&quot;: &quot;Run&quot;,
-    &quot;JUnit.AuthControllerWebMvcTest.login_shouldSetAccessAndRefreshCookies_andReturnUsername.executor&quot;: &quot;Run&quot;,
-    &quot;JUnit.AuthControllerWebMvcTest.logout_shouldRevokeAndClearCookies_whenCookiePresent.executor&quot;: &quot;Run&quot;,
-    &quot;JUnit.AuthControllerWebMvcTest.refresh_shouldReturn401_whenNoRefreshCookie.executor&quot;: &quot;Run&quot;,
-    &quot;JUnit.AuthControllerWebMvcTest.refresh_shouldReturn401_whenRefreshNotFound.executor&quot;: &quot;Run&quot;,
-    &quot;JUnit.AuthControllerWebMvcTest.refresh_shouldSetNewCookies_whenRefreshValid.executor&quot;: &quot;Run&quot;,
-    &quot;JUnit.AuthControllerWebMvcTest.register_shouldCallService_andReturnOk.executor&quot;: &quot;Run&quot;,
-    &quot;JUnit.AuthServiceTest.deleteById_shouldDelegateToRepo.executor&quot;: &quot;Run&quot;,
-    &quot;JUnit.AuthServiceTest.executor&quot;: &quot;Run&quot;,
-    &quot;JUnit.AuthServiceTest.findById_shouldReturnRefreshToken.executor&quot;: &quot;Run&quot;,
-    &quot;JUnit.AuthServiceTest.revokeAllForToken_doesNothing_whenTokenIsBlank.executor&quot;: &quot;Run&quot;,
-    &quot;JUnit.AuthServiceTest.revokeAllForToken_doesNothing_whenTokenIsNull.executor&quot;: &quot;Run&quot;,
-    &quot;JUnit.AuthServiceTest.revokeAllForToken_shouldDeleteByUsername_whenTokenFound.executor&quot;: &quot;Run&quot;,
-    &quot;JUnit.AuthServiceTest.revokeAllForToken_shouldDoNothing_whenTokenMissing.executor&quot;: &quot;Run&quot;,
-    &quot;JUnit.ChatControllerWebSocketTest.executor&quot;: &quot;Run&quot;,
-    &quot;JUnit.ChatControllerWebSocketTest.sendMessage_overWebSocket_shouldSendToKafka_andPublishToRedis.executor&quot;: &quot;Run&quot;,
-    &quot;JUnit.ChatHistoryControllerTest.executor&quot;: &quot;Run&quot;,
-    &quot;JUnit.ChatHistoryControllerWebMvcSliceTest.executor&quot;: &quot;Run&quot;,
-    &quot;JUnit.ChatHistoryControllerWebMvcTest.executor&quot;: &quot;Debug&quot;,
-    &quot;JUnit.ChatHistoryControllerWebMvcTest.getMessages_shouldClampLimitAndFetchLimitPlusOne.executor&quot;: &quot;Debug&quot;,
-    &quot;JUnit.ChatHistoryControllerWebMvcTest.getMessages_shouldRejectHalfCursor.executor&quot;: &quot;Run&quot;,
-    &quot;JUnit.ChatHistoryControllerWebMvcTest.getMessages_shouldReturnAccordingToLimitAndHasMoreTrue.executor&quot;: &quot;Debug&quot;,
-    &quot;JUnit.ChatHistoryControllerWebMvcTest.getMessages_shouldReturnNoCursor_whenNoMoreResults.executor&quot;: &quot;Debug&quot;,
-    &quot;JUnit.ChatMessageServiceTest.executor&quot;: &quot;Run&quot;,
-    &quot;JUnit.ChatMessageServiceTest.getMessagesCursor_whenCursorProvided_shouldUseBeforeQuery.executor&quot;: &quot;Run&quot;,
-    &quot;JUnit.ChatMessageServiceTest.getMessagesCursor_whenNoCursor_shouldUseFindLatestAndMapToModel.executor&quot;: &quot;Run&quot;,
-    &quot;JUnit.ChatMessageServiceTest.save_shouldPopulateEntityAndDelegateToRepository.executor&quot;: &quot;Run&quot;,
-    &quot;JUnit.MeControllerTest.executor&quot;: &quot;Run&quot;,
-    &quot;JUnit.MeControllerTest.me_shouldReturn401_whenNotAuthenticated.executor&quot;: &quot;Run&quot;,
-    &quot;JUnit.MeControllerTest.me_shouldReturnUsername_whenAuthenticated.executor&quot;: &quot;Debug&quot;,
-    &quot;JUnit.MeControllerWebMvcTest.executor&quot;: &quot;Run&quot;,
-    &quot;JUnit.UserServiceTest.executor&quot;: &quot;Run&quot;,
-    &quot;JUnit.UserServiceTest.findByUsername_delegatesToRepo.executor&quot;: &quot;Run&quot;,
-    &quot;JUnit.UserServiceTest.save_shouldSaveUserWithUsernameAndPasswordHash.executor&quot;: &quot;Run&quot;,
-    &quot;JUnit.UserServiceTest.userExists_returnsTrue.executor&quot;: &quot;Run&quot;,
-    &quot;JUnit.chat in chat.executor&quot;: &quot;Run&quot;,
-    &quot;JUnit.com.example.chat in chat.executor&quot;: &quot;Run&quot;,
-    &quot;JUnit.java in chat.executor&quot;: &quot;Run&quot;,
-    &quot;Maven. [package].executor&quot;: &quot;Run&quot;,
-    &quot;Maven.chat [clean].executor&quot;: &quot;Run&quot;,
-    &quot;Maven.chat [install].executor&quot;: &quot;Run&quot;,
-    &quot;Maven.chat [package].executor&quot;: &quot;Run&quot;,
-    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
-    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
-    &quot;com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1&quot;: &quot;true&quot;,
-    &quot;disable.download.node.interpreter.editor.notification&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
-    &quot;junie.onboarding.icon.badge.shown&quot;: &quot;true&quot;,
-    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;/Users/vasily/projects/chat&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;project.structure.last.edited&quot;: &quot;Modules&quot;,
-    &quot;project.structure.proportion&quot;: &quot;0.0&quot;,
-    &quot;project.structure.side.proportion&quot;: &quot;0.0&quot;,
-    &quot;to.speed.mode.migration.done&quot;: &quot;true&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ASKED_ADD_EXTERNAL_FILES": "true",
+    "Docker.Dockerfile.executor": "Run",
+    "Docker.backend/Dockerfile.executor": "Run",
+    "Docker.docker-compose.yml.backend: Compose Deployment.executor": "Run",
+    "Docker.docker-compose.yml.db: Compose Deployment.executor": "Run",
+    "Docker.docker-compose.yml.frontend: Compose Deployment.executor": "Run",
+    "Docker.docker-compose.yml.kafka: Compose Deployment.executor": "Run",
+    "Docker.docker-compose.yml.zookeeper: Compose Deployment.executor": "Run",
+    "Docker.docker-compose.yml: Compose Deployment.executor": "Run",
+    "Docker.frontend/Dockerfile.executor": "Run",
+    "JUnit.AuthControllerWebMvcTest.executor": "Run",
+    "JUnit.AuthControllerWebMvcTest.login_shouldReturn401_whenPasswordMismatch.executor": "Run",
+    "JUnit.AuthControllerWebMvcTest.login_shouldReturn401_whenUserNotFound.executor": "Run",
+    "JUnit.AuthControllerWebMvcTest.login_shouldSetAccessAndRefreshCookies_andReturnUsername.executor": "Run",
+    "JUnit.AuthControllerWebMvcTest.logout_shouldRevokeAndClearCookies_whenCookiePresent.executor": "Run",
+    "JUnit.AuthControllerWebMvcTest.refresh_shouldReturn401_whenNoRefreshCookie.executor": "Run",
+    "JUnit.AuthControllerWebMvcTest.refresh_shouldReturn401_whenRefreshNotFound.executor": "Run",
+    "JUnit.AuthControllerWebMvcTest.refresh_shouldSetNewCookies_whenRefreshValid.executor": "Run",
+    "JUnit.AuthControllerWebMvcTest.register_shouldCallService_andReturnOk.executor": "Run",
+    "JUnit.AuthServiceTest.deleteById_shouldDelegateToRepo.executor": "Run",
+    "JUnit.AuthServiceTest.executor": "Run",
+    "JUnit.AuthServiceTest.findById_shouldReturnRefreshToken.executor": "Run",
+    "JUnit.AuthServiceTest.revokeAllForToken_doesNothing_whenTokenIsBlank.executor": "Run",
+    "JUnit.AuthServiceTest.revokeAllForToken_doesNothing_whenTokenIsNull.executor": "Run",
+    "JUnit.AuthServiceTest.revokeAllForToken_shouldDeleteByUsername_whenTokenFound.executor": "Run",
+    "JUnit.AuthServiceTest.revokeAllForToken_shouldDoNothing_whenTokenMissing.executor": "Run",
+    "JUnit.ChatControllerWebSocketTest.executor": "Run",
+    "JUnit.ChatControllerWebSocketTest.sendMessage_overWebSocket_shouldSendToKafka_andPublishToRedis.executor": "Run",
+    "JUnit.ChatHistoryControllerTest.executor": "Run",
+    "JUnit.ChatHistoryControllerWebMvcSliceTest.executor": "Run",
+    "JUnit.ChatHistoryControllerWebMvcTest.executor": "Debug",
+    "JUnit.ChatHistoryControllerWebMvcTest.getMessages_shouldClampLimitAndFetchLimitPlusOne.executor": "Debug",
+    "JUnit.ChatHistoryControllerWebMvcTest.getMessages_shouldRejectHalfCursor.executor": "Run",
+    "JUnit.ChatHistoryControllerWebMvcTest.getMessages_shouldReturnAccordingToLimitAndHasMoreTrue.executor": "Debug",
+    "JUnit.ChatHistoryControllerWebMvcTest.getMessages_shouldReturnNoCursor_whenNoMoreResults.executor": "Debug",
+    "JUnit.ChatMessageServiceTest.executor": "Run",
+    "JUnit.ChatMessageServiceTest.getMessagesCursor_whenCursorProvided_shouldUseBeforeQuery.executor": "Run",
+    "JUnit.ChatMessageServiceTest.getMessagesCursor_whenNoCursor_shouldUseFindLatestAndMapToModel.executor": "Run",
+    "JUnit.ChatMessageServiceTest.save_shouldPopulateEntityAndDelegateToRepository.executor": "Run",
+    "JUnit.MeControllerTest.executor": "Run",
+    "JUnit.MeControllerTest.me_shouldReturn401_whenNotAuthenticated.executor": "Run",
+    "JUnit.MeControllerTest.me_shouldReturnUsername_whenAuthenticated.executor": "Debug",
+    "JUnit.MeControllerWebMvcTest.executor": "Run",
+    "JUnit.RateLimiterServiceTest.executor": "Run",
+    "JUnit.UserServiceTest.executor": "Run",
+    "JUnit.UserServiceTest.findByUsername_delegatesToRepo.executor": "Run",
+    "JUnit.UserServiceTest.save_shouldSaveUserWithUsernameAndPasswordHash.executor": "Run",
+    "JUnit.UserServiceTest.userExists_returnsTrue.executor": "Run",
+    "JUnit.chat in chat.executor": "Run",
+    "JUnit.com.example.chat in chat.executor": "Run",
+    "JUnit.java in chat.executor": "Run",
+    "Maven. [package].executor": "Run",
+    "Maven.chat [clean].executor": "Run",
+    "Maven.chat [install].executor": "Run",
+    "Maven.chat [package].executor": "Run",
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
+    "RunOnceActivity.zencoder-patch-add-chat-message-raw-content": "true",
+    "RunOnceActivity.zencoder-patch-generate-chat-message-id": "true",
+    "RunOnceActivity.zencoder-patch-migrate-custom-instruction": "true",
+    "RunOnceActivity.zencoder-patch-migrate-repo-info-to-rules": "true",
+    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1": "true",
+    "disable.download.node.interpreter.editor.notification": "true",
+    "git-widget-placeholder": "main",
+    "junie.onboarding.icon.badge.shown": "true",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "/Users/vasily/projects/chat",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "project.structure.last.edited": "Modules",
+    "project.structure.proportion": "0.0",
+    "project.structure.side.proportion": "0.0",
+    "settings.editor.selected.configurable": "preferences.pluginManager",
+    "to.speed.mode.migration.done": "true",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$" />
@@ -169,7 +175,7 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="AuthControllerWebMvcTest.login_shouldSetAccessAndRefreshCookies_andReturnUsername" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+    <configuration name="MessagingControllerWebSocketTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
       <module name="chat" />
       <extension name="coverage">
         <pattern>
@@ -178,25 +184,8 @@
         </pattern>
       </extension>
       <option name="PACKAGE_NAME" value="com.example.chat.controller" />
-      <option name="MAIN_CLASS_NAME" value="com.example.chat.controller.AuthControllerWebMvcTest" />
-      <option name="METHOD_NAME" value="login_shouldSetAccessAndRefreshCookies_andReturnUsername" />
-      <option name="TEST_OBJECT" value="method" />
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
-    <configuration name="AuthControllerWebMvcTest.register_shouldCallService_andReturnOk" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
-      <module name="chat" />
-      <extension name="coverage">
-        <pattern>
-          <option name="PATTERN" value="com.example.chat.controller.*" />
-          <option name="ENABLED" value="true" />
-        </pattern>
-      </extension>
-      <option name="PACKAGE_NAME" value="com.example.chat.controller" />
-      <option name="MAIN_CLASS_NAME" value="com.example.chat.controller.AuthControllerWebMvcTest" />
-      <option name="METHOD_NAME" value="register_shouldCallService_andReturnOk" />
-      <option name="TEST_OBJECT" value="method" />
+      <option name="MAIN_CLASS_NAME" value="com.example.chat.controller.MessagingControllerWebSocketTest" />
+      <option name="TEST_OBJECT" value="class" />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
@@ -213,6 +202,21 @@
       <option name="MAIN_CLASS_NAME" value="com.example.chat.controller.MessagingControllerWebSocketTest" />
       <option name="METHOD_NAME" value="sendMessage_overWebSocket_shouldSendToKafka_andPublishToRedis" />
       <option name="TEST_OBJECT" value="method" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="RateLimiterServiceTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="chat" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="com.example.chat.service.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="com.example.chat.service" />
+      <option name="MAIN_CLASS_NAME" value="com.example.chat.service.RateLimiterServiceTest" />
+      <option name="TEST_OBJECT" value="class" />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
@@ -247,10 +251,10 @@
     <recent_temporary>
       <list>
         <item itemvalue="JUnit.chat in chat" />
+        <item itemvalue="JUnit.MessagingControllerWebSocketTest" />
+        <item itemvalue="JUnit.RateLimiterServiceTest" />
         <item itemvalue="JUnit.AuthControllerWebMvcTest" />
         <item itemvalue="JUnit.MessagingControllerWebSocketTest.sendMessage_overWebSocket_shouldSendToKafka_andPublishToRedis" />
-        <item itemvalue="JUnit.AuthControllerWebMvcTest.register_shouldCallService_andReturnOk" />
-        <item itemvalue="JUnit.AuthControllerWebMvcTest.login_shouldSetAccessAndRefreshCookies_andReturnUsername" />
       </list>
     </recent_temporary>
   </component>
@@ -305,7 +309,15 @@
       <option name="project" value="LOCAL" />
       <updated>1767452207909</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="Add concurrent processing (3) for consuming the messages from Kafka, add replication factor (3), add more instances of the backend app (5), fix wrong naming,">
+      <option name="closed" value="true" />
+      <created>1774703357890</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1774703357891</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -328,7 +340,8 @@
     <MESSAGE value="Improve authentication, refactor and add tests" />
     <MESSAGE value="Add cloud formation and aws-related stuff, refactor" />
     <MESSAGE value="Add README, tune up cookie authentication, add logging" />
-    <option name="LAST_COMMIT_MESSAGE" value="Add README, tune up cookie authentication, add logging" />
+    <MESSAGE value="Add concurrent processing (3) for consuming the messages from Kafka, add replication factor (3), add more instances of the backend app (5), fix wrong naming," />
+    <option name="LAST_COMMIT_MESSAGE" value="Add concurrent processing (3) for consuming the messages from Kafka, add replication factor (3), add more instances of the backend app (5), fix wrong naming," />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -365,5 +378,586 @@
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
+  </component>
+  <component name="ai.zencoder.plugin.mcp">
+    <option name="internalToolsState" value="{&quot;fetch_webpage&quot;:true,&quot;web_search&quot;:true,&quot;file_search&quot;:true,&quot;ExecuteShellCommand&quot;:true,&quot;str_replace_editor&quot;:true,&quot;FileDiagnosticsTool&quot;:true,&quot;fulltext_search&quot;:true,&quot;RequirementsTool&quot;:true}" />
+    <option name="libraryTools">
+      <map>
+        <entry key="agentql">
+          <value>
+            <McpServerInfo />
+          </value>
+        </entry>
+        <entry key="agentrpc">
+          <value>
+            <McpServerInfo />
+          </value>
+        </entry>
+        <entry key="aiven">
+          <value>
+            <McpServerInfo />
+          </value>
+        </entry>
+        <entry key="apache iotdb">
+          <value>
+            <McpServerInfo />
+          </value>
+        </entry>
+        <entry key="apify">
+          <value>
+            <McpServerInfo />
+          </value>
+        </entry>
+        <entry key="apimatic mcp">
+          <value>
+            <McpServerInfo />
+          </value>
+        </entry>
+        <entry key="astra db">
+          <value>
+            <McpServerInfo />
+          </value>
+        </entry>
+        <entry key="aws kb retrieval">
+          <value>
+            <McpServerInfo />
+          </value>
+        </entry>
+        <entry key="axiom">
+          <value>
+            <McpServerInfo />
+          </value>
+        </entry>
+        <entry key="bankless onchain">
+          <value>
+            <McpServerInfo />
+          </value>
+        </entry>
+        <entry key="bicscan">
+          <value>
+            <McpServerInfo />
+          </value>
+        </entry>
+        <entry key="box">
+          <value>
+            <McpServerInfo />
+          </value>
+        </entry>
+        <entry key="brave search">
+          <value>
+            <McpServerInfo />
+          </value>
+        </entry>
+        <entry key="browserbase">
+          <value>
+            <McpServerInfo />
+          </value>
+        </entry>
+        <entry key="chroma">
+          <value>
+            <McpServerInfo />
+          </value>
+        </entry>
+        <entry key="circleci">
+          <value>
+            <McpServerInfo />
+          </value>
+        </entry>
+        <entry key="clickhouse">
+          <value>
+            <McpServerInfo />
+          </value>
+        </entry>
+        <entry key="cloudflare">
+          <value>
+            <McpServerInfo />
+          </value>
+        </entry>
+        <entry key="codacy">
+          <value>
+            <McpServerInfo />
+          </value>
+        </entry>
+        <entry key="codelogic">
+          <value>
+            <McpServerInfo />
+          </value>
+        </entry>
+        <entry key="comet opik">
+          <value>
+            <McpServerInfo />
+          </value>
+        </entry>
+        <entry key="context7">
+          <value>
+            <McpServerInfo />
+          </value>
+        </entry>
+        <entry key="convex">
+          <value>
+            <McpServerInfo />
+          </value>
+        </entry>
+        <entry key="e2b">
+          <value>
+            <McpServerInfo />
+          </value>
+        </entry>
+        <entry key="elasticsearch">
+          <value>
+            <McpServerInfo />
+          </value>
+        </entry>
+        <entry key="everart">
+          <value>
+            <McpServerInfo />
+          </value>
+        </entry>
+        <entry key="everything">
+          <value>
+            <McpServerInfo />
+          </value>
+        </entry>
+        <entry key="exa">
+          <value>
+            <McpServerInfo />
+          </value>
+        </entry>
+        <entry key="fetch">
+          <value>
+            <McpServerInfo />
+          </value>
+        </entry>
+        <entry key="fibery">
+          <value>
+            <McpServerInfo />
+          </value>
+        </entry>
+        <entry key="filesystem">
+          <value>
+            <McpServerInfo />
+          </value>
+        </entry>
+        <entry key="financial datasets">
+          <value>
+            <McpServerInfo />
+          </value>
+        </entry>
+        <entry key="firecrawl">
+          <value>
+            <McpServerInfo />
+          </value>
+        </entry>
+        <entry key="fireproof">
+          <value>
+            <McpServerInfo />
+          </value>
+        </entry>
+        <entry key="forevervm">
+          <value>
+            <McpServerInfo />
+          </value>
+        </entry>
+        <entry key="git">
+          <value>
+            <McpServerInfo />
+          </value>
+        </entry>
+        <entry key="gitee">
+          <value>
+            <McpServerInfo />
+          </value>
+        </entry>
+        <entry key="github">
+          <value>
+            <McpServerInfo />
+          </value>
+        </entry>
+        <entry key="gitlab">
+          <value>
+            <McpServerInfo />
+          </value>
+        </entry>
+        <entry key="google drive">
+          <value>
+            <McpServerInfo />
+          </value>
+        </entry>
+        <entry key="google maps">
+          <value>
+            <McpServerInfo />
+          </value>
+        </entry>
+        <entry key="grafana">
+          <value>
+            <McpServerInfo />
+          </value>
+        </entry>
+        <entry key="graphlit">
+          <value>
+            <McpServerInfo />
+          </value>
+        </entry>
+        <entry key="greptimedb">
+          <value>
+            <McpServerInfo />
+          </value>
+        </entry>
+        <entry key="heroku">
+          <value>
+            <McpServerInfo />
+          </value>
+        </entry>
+        <entry key="hologres">
+          <value>
+            <McpServerInfo />
+          </value>
+        </entry>
+        <entry key="hyperbrowser">
+          <value>
+            <McpServerInfo />
+          </value>
+        </entry>
+        <entry key="ibm wxflows">
+          <value>
+            <McpServerInfo />
+          </value>
+        </entry>
+        <entry key="inkeep">
+          <value>
+            <McpServerInfo />
+          </value>
+        </entry>
+        <entry key="integration app">
+          <value>
+            <McpServerInfo />
+          </value>
+        </entry>
+        <entry key="jetbrains">
+          <value>
+            <McpServerInfo />
+          </value>
+        </entry>
+        <entry key="kagi search">
+          <value>
+            <McpServerInfo />
+          </value>
+        </entry>
+        <entry key="langfuse prompt management">
+          <value>
+            <McpServerInfo />
+          </value>
+        </entry>
+        <entry key="logfire">
+          <value>
+            <McpServerInfo />
+          </value>
+        </entry>
+        <entry key="mailgun">
+          <value>
+            <McpServerInfo />
+          </value>
+        </entry>
+        <entry key="make">
+          <value>
+            <McpServerInfo />
+          </value>
+        </entry>
+        <entry key="meilisearch">
+          <value>
+            <McpServerInfo />
+          </value>
+        </entry>
+        <entry key="memory">
+          <value>
+            <McpServerInfo />
+          </value>
+        </entry>
+        <entry key="metoro">
+          <value>
+            <McpServerInfo />
+          </value>
+        </entry>
+        <entry key="milvus">
+          <value>
+            <McpServerInfo />
+          </value>
+        </entry>
+        <entry key="momento">
+          <value>
+            <McpServerInfo />
+          </value>
+        </entry>
+        <entry key="motherduck">
+          <value>
+            <McpServerInfo />
+          </value>
+        </entry>
+        <entry key="needle">
+          <value>
+            <McpServerInfo />
+          </value>
+        </entry>
+        <entry key="neo4j">
+          <value>
+            <McpServerInfo />
+          </value>
+        </entry>
+        <entry key="neon">
+          <value>
+            <McpServerInfo />
+          </value>
+        </entry>
+        <entry key="notion">
+          <value>
+            <McpServerInfo />
+          </value>
+        </entry>
+        <entry key="oceanbase">
+          <value>
+            <McpServerInfo />
+          </value>
+        </entry>
+        <entry key="octagon">
+          <value>
+            <McpServerInfo />
+          </value>
+        </entry>
+        <entry key="oxylabs">
+          <value>
+            <McpServerInfo />
+          </value>
+        </entry>
+        <entry key="paddle">
+          <value>
+            <McpServerInfo />
+          </value>
+        </entry>
+        <entry key="paypal">
+          <value>
+            <McpServerInfo />
+          </value>
+        </entry>
+        <entry key="perplexity">
+          <value>
+            <McpServerInfo />
+          </value>
+        </entry>
+        <entry key="playwright">
+          <value>
+            <McpServerInfo />
+          </value>
+        </entry>
+        <entry key="postgresql">
+          <value>
+            <McpServerInfo />
+          </value>
+        </entry>
+        <entry key="puppeteer">
+          <value>
+            <McpServerInfo />
+          </value>
+        </entry>
+        <entry key="qdrant">
+          <value>
+            <McpServerInfo />
+          </value>
+        </entry>
+        <entry key="ramp">
+          <value>
+            <McpServerInfo />
+          </value>
+        </entry>
+        <entry key="raygun">
+          <value>
+            <McpServerInfo />
+          </value>
+        </entry>
+        <entry key="redis">
+          <value>
+            <McpServerInfo />
+          </value>
+        </entry>
+        <entry key="riza">
+          <value>
+            <McpServerInfo />
+          </value>
+        </entry>
+        <entry key="screenshotone">
+          <value>
+            <McpServerInfo />
+          </value>
+        </entry>
+        <entry key="search1api">
+          <value>
+            <McpServerInfo />
+          </value>
+        </entry>
+        <entry key="semgrep">
+          <value>
+            <McpServerInfo />
+          </value>
+        </entry>
+        <entry key="sentry">
+          <value>
+            <McpServerInfo />
+          </value>
+        </entry>
+        <entry key="sequential thinking">
+          <value>
+            <McpServerInfo />
+          </value>
+        </entry>
+        <entry key="singlestore">
+          <value>
+            <McpServerInfo />
+          </value>
+        </entry>
+        <entry key="slack">
+          <value>
+            <McpServerInfo />
+          </value>
+        </entry>
+        <entry key="sqlite">
+          <value>
+            <McpServerInfo />
+          </value>
+        </entry>
+        <entry key="starrocks">
+          <value>
+            <McpServerInfo />
+          </value>
+        </entry>
+        <entry key="stripe">
+          <value>
+            <McpServerInfo />
+          </value>
+        </entry>
+        <entry key="taskmaster-ai">
+          <value>
+            <McpServerInfo />
+          </value>
+        </entry>
+        <entry key="tavily">
+          <value>
+            <McpServerInfo />
+          </value>
+        </entry>
+        <entry key="thirdweb">
+          <value>
+            <McpServerInfo />
+          </value>
+        </entry>
+        <entry key="tinybird">
+          <value>
+            <McpServerInfo />
+          </value>
+        </entry>
+        <entry key="unifai">
+          <value>
+            <McpServerInfo />
+          </value>
+        </entry>
+        <entry key="unstructured">
+          <value>
+            <McpServerInfo />
+          </value>
+        </entry>
+        <entry key="vectorize">
+          <value>
+            <McpServerInfo />
+          </value>
+        </entry>
+        <entry key="zapier">
+          <value>
+            <McpServerInfo />
+          </value>
+        </entry>
+        <entry key="zenml">
+          <value>
+            <McpServerInfo />
+          </value>
+        </entry>
+      </map>
+    </option>
+    <option name="zencoderBackendTools">
+      <map>
+        <entry key="ExecuteShellCommand">
+          <value>
+            <McpServerInfo>
+              <option name="status">
+                <McpServerStatus />
+              </option>
+            </McpServerInfo>
+          </value>
+        </entry>
+        <entry key="FileDiagnosticsTool">
+          <value>
+            <McpServerInfo>
+              <option name="status">
+                <McpServerStatus />
+              </option>
+            </McpServerInfo>
+          </value>
+        </entry>
+        <entry key="RequirementsTool">
+          <value>
+            <McpServerInfo>
+              <option name="status">
+                <McpServerStatus />
+              </option>
+            </McpServerInfo>
+          </value>
+        </entry>
+        <entry key="fetch_webpage">
+          <value>
+            <McpServerInfo>
+              <option name="status">
+                <McpServerStatus />
+              </option>
+            </McpServerInfo>
+          </value>
+        </entry>
+        <entry key="file_search">
+          <value>
+            <McpServerInfo>
+              <option name="status">
+                <McpServerStatus />
+              </option>
+            </McpServerInfo>
+          </value>
+        </entry>
+        <entry key="fulltext_search">
+          <value>
+            <McpServerInfo>
+              <option name="status">
+                <McpServerStatus />
+              </option>
+            </McpServerInfo>
+          </value>
+        </entry>
+        <entry key="str_replace_editor">
+          <value>
+            <McpServerInfo>
+              <option name="status">
+                <McpServerStatus />
+              </option>
+            </McpServerInfo>
+          </value>
+        </entry>
+        <entry key="web_search">
+          <value>
+            <McpServerInfo>
+              <option name="status">
+                <McpServerStatus />
+              </option>
+            </McpServerInfo>
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="ai.zencoder.plugin.rag.RepoInfoWarningState">
+    <option name="lastCheckTime" value="1774801446813" />
   </component>
 </project>

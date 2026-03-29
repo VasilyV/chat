@@ -5,6 +5,7 @@ import com.example.chat.kafka.KafkaProducer;
 import com.example.chat.model.Message;
 import com.example.chat.redis.RedisPublisher;
 import com.example.chat.service.MessageService;
+import com.example.chat.service.RateLimiterService;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.AfterEach;
@@ -26,6 +27,7 @@ import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
@@ -62,6 +64,9 @@ class MessagingControllerWebSocketTest {
     @MockBean
     MessageService messageService;
 
+    @MockBean
+    RateLimiterService rateLimiterService;
+
     private WebSocketStompClient stompClient;
     private StompSession session;
 
@@ -77,6 +82,8 @@ class MessagingControllerWebSocketTest {
 
     @Test
     void sendMessage_overWebSocket_shouldSendToKafka_andPublishToRedis() throws Exception {
+        when(rateLimiterService.isAllowed(anyString(), anyInt(), anyInt())).thenReturn(true);
+
         CountDownLatch latch = new CountDownLatch(2);
         doAnswer(inv -> { latch.countDown(); return null; })
                 .when(producer).sendMessage(anyString(), anyString(), anyString());
@@ -130,5 +137,31 @@ class MessagingControllerWebSocketTest {
         assertThat(redis.get("roomId").asText()).isEqualTo("room-1");
         assertThat(redis.get("sender").asText()).isEqualTo("alice");
         assertThat(redis.get("content").asText()).isEqualTo("hello");
+    }
+
+    @Test
+    void sendMessage_whenRateLimited_shouldNotPublishAnything() throws Exception {
+        when(rateLimiterService.isAllowed(anyString(), anyInt(), anyInt())).thenReturn(false);
+
+        stompClient = new WebSocketStompClient(new StandardWebSocketClient());
+        stompClient.setMessageConverter(new MappingJackson2MessageConverter());
+
+        String url = "ws://localhost:" + port + "/ws-chat";
+        session = stompClient
+                .connectAsync(url, new StompSessionHandlerAdapter() {})
+                .get(3, TimeUnit.SECONDS);
+
+        Message m = new Message();
+        m.setRoomId("room-1");
+        m.setSender("bob");
+        m.setContent("spam");
+
+        session.send("/app/chat.sendMessage", m);
+
+        // Wait a bit to ensure nothing happens
+        Thread.sleep(500);
+
+        verify(producer, never()).sendMessage(anyString(), anyString(), anyString());
+        verify(redisPublisher, never()).publish(anyString(), anyString());
     }
 }
