@@ -140,15 +140,35 @@ class MessagingControllerWebSocketTest {
     }
 
     @Test
-    void sendMessage_whenRateLimited_shouldNotPublishAnything() throws Exception {
+    void sendMessage_whenRateLimited_shouldSendErrorMessageToUser() throws Exception {
         when(rateLimiterService.isAllowed(anyString(), anyInt(), anyInt())).thenReturn(false);
 
         stompClient = new WebSocketStompClient(new StandardWebSocketClient());
         stompClient.setMessageConverter(new MappingJackson2MessageConverter());
 
         String url = "ws://localhost:" + port + "/ws-chat";
+        
+        CountDownLatch errorLatch = new CountDownLatch(1);
+        final Message[] errorReceived = new Message[1];
+
         session = stompClient
-                .connectAsync(url, new StompSessionHandlerAdapter() {})
+                .connectAsync(url, new StompSessionHandlerAdapter() {
+                    @Override
+                    public void afterConnected(StompSession session, StompHeaders connectedHeaders) {
+                        session.subscribe("/user/queue/errors", new StompFrameHandler() {
+                            @Override
+                            public java.lang.reflect.Type getPayloadType(StompHeaders headers) {
+                                return Message.class;
+                            }
+
+                            @Override
+                            public void handleFrame(StompHeaders headers, Object payload) {
+                                errorReceived[0] = (Message) payload;
+                                errorLatch.countDown();
+                            }
+                        });
+                    }
+                })
                 .get(3, TimeUnit.SECONDS);
 
         Message m = new Message();
@@ -158,8 +178,13 @@ class MessagingControllerWebSocketTest {
 
         session.send("/app/chat.sendMessage", m);
 
-        // Wait a bit to ensure nothing happens
-        Thread.sleep(500);
+        if (!errorLatch.await(3, TimeUnit.SECONDS)) {
+            fail("Timed out waiting for error message on /user/queue/errors");
+        }
+
+        assertThat(errorReceived[0]).isNotNull();
+        assertThat(errorReceived[0].getSender()).isEqualTo("SYSTEM");
+        assertThat(errorReceived[0].getContent()).contains("Rate limit exceeded");
 
         verify(producer, never()).sendMessage(anyString(), anyString(), anyString());
         verify(redisPublisher, never()).publish(anyString(), anyString());

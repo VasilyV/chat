@@ -2,7 +2,9 @@ import { Client } from '@stomp/stompjs';
 
 let client = null;
 let subscription = null;
+let errorSubscription = null;
 let messageHandler = null;
+let errorHandler = null;
 
 function subscribeToRoom(roomId) {
   if (!client || !client.connected) return;
@@ -12,6 +14,11 @@ function subscribeToRoom(roomId) {
     subscription = null;
   }
 
+  if (errorSubscription) {
+    try { errorSubscription.unsubscribe(); } catch {}
+    errorSubscription = null;
+  }
+
   subscription = client.subscribe(`/topic/rooms/${roomId}`, (msg) => {
     try {
       messageHandler?.(JSON.parse(msg.body));
@@ -19,10 +26,19 @@ function subscribeToRoom(roomId) {
       console.error('Failed to parse WS message', e);
     }
   });
+
+  errorSubscription = client.subscribe('/user/queue/errors', (msg) => {
+    try {
+      errorHandler?.(JSON.parse(msg.body));
+    } catch (e) {
+      console.error('Failed to parse WS error', e);
+    }
+  });
 }
 
-export function connectWebSocket(roomId, onMessage) {
+export function connectWebSocket(roomId, onMessage, onError) {
   messageHandler = onMessage;
+  errorHandler = onError;
 
   if (!client) {
     client = new Client({

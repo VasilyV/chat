@@ -7,7 +7,9 @@ import com.example.chat.service.RateLimiterService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.messaging.handler.annotation.MessageExceptionHandler;
 import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.simp.annotation.SendToUser;
 import org.springframework.stereotype.Controller;
 
 @Controller
@@ -34,7 +36,7 @@ public class MessagingController {
         // Simple rate limit: 10 messages per 5 seconds
         if (!rateLimiterService.isAllowed("sendMessage:" + message.getSender(), 10, 5)) {
             log.warn("Rate limit exceeded for sender={}", message.getSender());
-            return;
+            throw new RuntimeException("Rate limit exceeded. Please wait a moment.");
         }
 
         String json = mapper.writeValueAsString(message);
@@ -44,5 +46,15 @@ public class MessagingController {
         String channel = "chat:room:" + roomId;
         String redisPayload = mapper.writeValueAsString(message);
         redisPublisher.publish(channel, redisPayload);
+    }
+
+    @MessageExceptionHandler
+    @SendToUser("/queue/errors")
+    public Message handleException(Exception exception) {
+        log.error("WebSocket exception: {}", exception.getMessage());
+        Message error = new Message();
+        error.setSender("SYSTEM");
+        error.setContent("Error: " + exception.getMessage());
+        return error;
     }
 }

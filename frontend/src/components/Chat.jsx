@@ -72,6 +72,9 @@ export default function Chat({ user }) {
           el.scrollTop = el.scrollHeight;
         });
       }
+    }, (err) => {
+      // In a real app, use a proper toast/alert component
+      alert(err.content);
     });
 
     return () => {
